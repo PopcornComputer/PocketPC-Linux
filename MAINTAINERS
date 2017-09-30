@@ -9233,6 +9233,12 @@ L:	linux-kernel@vger.kernel.org
 S:	Maintained
 F:	drivers/misc/hisi_hikey_usb.c
 
+HIMAX HM5065 SENSOR DRIVER
+M:	Ondrej Jirman <kernel@xff.cz>
+L:	linux-media@vger.kernel.org
+S:	Supported
+F:	drivers/media/i2c/hm5065.c
+
 HIMAX HX83112B TOUCHSCREEN SUPPORT
 M:	Job Noorman <job@noorman.info>
 L:	linux-input@vger.kernel.org
