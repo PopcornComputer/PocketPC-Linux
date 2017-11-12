@@ -24,6 +24,17 @@ config SND_SUN8I_CODEC
 
 	  Say Y or M if you want to add sun8i digital audio codec support.
 
+config SND_AC100_CODEC
+	tristate "Allwinner (X-Powers) AC100 audio codec (analog part)"
+	depends on OF
+	depends on MACH_SUN8I || COMPILE_TEST
+	select MFD_AC100
+	help
+	  This option enables the audio codec support for Allwinner (X-Powers)
+	  AC100 chip.
+
+	  Say Y or M if you want to add AC100 audio codec support.
+
 config SND_SUN8I_CODEC_ANALOG
 	tristate "Allwinner sun8i Codec Analog Controls Support"
 	depends on MACH_SUN8I || (ARM64 && ARCH_SUNXI) || COMPILE_TEST
