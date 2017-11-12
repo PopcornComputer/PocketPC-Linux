@@ -829,6 +829,11 @@
 				function = "spdif";
 			};
 
+			i2s0_pins: i2s0-pins {
+				pins = "PB4", "PB5", "PB6", "PB7", "PB8";
+				function = "i2s0";
+			};
+
 			uart0_pb_pins: uart0-pb-pins {
 				pins = "PB9", "PB10";
 				function = "uart0";
