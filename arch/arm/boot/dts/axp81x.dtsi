@@ -175,4 +175,9 @@
 	usb_power_supply: usb-power-supply {
 		compatible = "x-powers,axp813-usb-power-supply";
 	};
+
+	charger_led: charger-led {
+		compatible = "x-powers,axp813-charger-led";
+		status = "disabled";
+	};
 };
