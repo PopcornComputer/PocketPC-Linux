@@ -822,6 +822,9 @@ static int h5_serdev_probe(struct serdev_device *serdev)
 			return -ENODEV;
 
 		h5->vnd = (const struct h5_vnd *)data;
+
+		of_property_read_string(dev->of_node,
+					"firmware-postfix", &h5->id);
 	}
 
 
@@ -1010,6 +1013,12 @@ static struct h5_vnd rtl_vnd = {
 	.resume		= h5_btrtl_resume,
 	.acpi_gpio_map	= acpi_btrtl_gpios,
 };
+
+static struct h5_vnd rtl_vnd_nosuspend = {
+	.setup		= h5_btrtl_setup,
+	.open		= h5_btrtl_open,
+	.close		= h5_btrtl_close,
+};
 #endif
 
 #ifdef CONFIG_ACPI
@@ -1035,6 +1044,8 @@ static const struct of_device_id rtl_bluetooth_of_match[] = {
 	  .data = (const void *)&rtl_vnd },
 	{ .compatible = "realtek,rtl8723ds-bt",
 	  .data = (const void *)&rtl_vnd },
+	{ .compatible = "realtek,rtl8723cs-bt",
+	  .data = (const void *)&rtl_vnd_nosuspend },
 #endif
 	{ },
 };
