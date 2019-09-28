@@ -21,13 +21,29 @@
 
 #define CY_TOUCH_SETTINGS_MAX 32
 
-struct touch_framework {
-	const uint16_t  *abs;
-	uint8_t         size;
-} __packed;
+/* abs axis signal offsets in the signals array  */
+enum cyttsp4_sig_ost {
+	CY_ABS_X_OST,
+	CY_ABS_Y_OST,
+	CY_ABS_P_OST,
+	CY_ABS_W_OST,
+	CY_ABS_ID_OST,
+	CY_ABS_MAJ_OST,
+	CY_ABS_MIN_OST,
+	CY_ABS_OR_OST,
+	CY_NUM_ABS_OST	/* number of abs signals */
+};
 
 struct cyttsp4_virtual_key {
 	int code;
+};
+
+struct cyttsp4_signal_def {
+	int signal;
+	int min;
+	int max;
+	int fuzz;
+	int flat;
 };
 
 struct cyttsp4_platform_data {
@@ -46,7 +62,8 @@ struct cyttsp4_platform_data {
 	int (*irq_stat)(struct cyttsp4_platform_data *pdata,
 		struct device *dev);
 
-	struct touch_framework *frmwrk;
+	int n_signals;
+	struct cyttsp4_signal_def *signals;
 
 	int n_keys;
 	struct cyttsp4_virtual_key* keys;
