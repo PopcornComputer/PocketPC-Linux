@@ -27,36 +27,30 @@ struct touch_framework {
 	uint8_t         enable_vkeys;
 } __packed;
 
-struct cyttsp4_mt_platform_data {
-	struct touch_framework *frmwrk;
-	unsigned short flags;
-	char const *inp_dev_name;
-};
-
 struct cyttsp4_virtual_key {
 	int code;
 };
 
-struct cyttsp4_core_platform_data {
+struct cyttsp4_platform_data {
+	char const *inp_dev_name;
+	unsigned short flags;
+
 	int irq_gpio;
 	int rst_gpio;
 	int level_irq_udelay;
-	int (*xres)(struct cyttsp4_core_platform_data *pdata,
+	int (*xres)(struct cyttsp4_platform_data *pdata,
 		struct device *dev);
-	int (*init)(struct cyttsp4_core_platform_data *pdata,
+	int (*init)(struct cyttsp4_platform_data *pdata,
 		int on, struct device *dev);
-	int (*power)(struct cyttsp4_core_platform_data *pdata,
+	int (*power)(struct cyttsp4_platform_data *pdata,
 		int on, struct device *dev, atomic_t *ignore_irq);
-	int (*irq_stat)(struct cyttsp4_core_platform_data *pdata,
+	int (*irq_stat)(struct cyttsp4_platform_data *pdata,
 		struct device *dev);
+
+	struct touch_framework *frmwrk;
 
 	int n_keys;
 	struct cyttsp4_virtual_key* keys;
-};
-
-struct cyttsp4_platform_data {
-	struct cyttsp4_core_platform_data *core_pdata;
-	struct cyttsp4_mt_platform_data *mt_pdata;
 };
 
 #endif /* _CYTTSP4_H_ */
