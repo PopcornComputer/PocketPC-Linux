@@ -357,32 +357,6 @@ enum cyttsp4_hst_mode_bits {
 	CY_HST_RESET       = (1 << 0),
 };
 
-/* abs settings */
-#define CY_IGNORE_VALUE			0xFFFF
-
-/* abs signal capabilities offsets in the frameworks array */
-enum cyttsp4_sig_caps {
-	CY_SIGNAL_OST,
-	CY_MIN_OST,
-	CY_MAX_OST,
-	CY_FUZZ_OST,
-	CY_FLAT_OST,
-	CY_NUM_ABS_SET	/* number of signal capability fields */
-};
-
-/* abs axis signal offsets in the framworks array  */
-enum cyttsp4_sig_ost {
-	CY_ABS_X_OST,
-	CY_ABS_Y_OST,
-	CY_ABS_P_OST,
-	CY_ABS_W_OST,
-	CY_ABS_ID_OST,
-	CY_ABS_MAJ_OST,
-	CY_ABS_MIN_OST,
-	CY_ABS_OR_OST,
-	CY_NUM_ABS_OST	/* number of abs signals */
-};
-
 enum cyttsp4_flags {
 	CY_FLAG_NONE = 0x00,
 	CY_FLAG_HOVER = 0x04,
