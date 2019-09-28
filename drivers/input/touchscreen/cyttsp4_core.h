@@ -305,16 +305,6 @@ struct cyttsp4_sysinfo {
 	u8 *xy_data;			/* operational touch regs */
 };
 
-struct cyttsp4_mt_data {
-	struct cyttsp4_mt_platform_data *pdata;
-	struct cyttsp4_sysinfo *si;
-	struct input_dev *input;
-	struct mutex report_lock;
-	bool is_suspended;
-	char phys[NAME_MAX];
-	int num_prv_tch;
-};
-
 struct cyttsp4 {
 	struct device *dev;
 	struct mutex system_lock;
@@ -333,9 +323,13 @@ struct cyttsp4 {
 	int exclusive_waits;
 	atomic_t ignore_irq;
 	bool invalid_touch_app;
-	struct cyttsp4_mt_data md;
+	struct cyttsp4_sysinfo *si;
+	struct input_dev *input;
+	struct mutex report_lock;
+	bool is_suspended;
+	char phys[NAME_MAX];
+	int num_prv_tch;
 	struct cyttsp4_platform_data *pdata;
-	struct cyttsp4_core_platform_data *cpdata;
 	const struct cyttsp4_bus_ops *bus_ops;
 	u8 *xfer_buf;
 #ifdef VERBOSE_DEBUG
