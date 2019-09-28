@@ -33,11 +33,9 @@ struct cyttsp4_mt_platform_data {
 	char const *inp_dev_name;
 };
 
-struct touch_settings {
-	const uint8_t *data;
-	uint32_t size;
-	uint8_t tag;
-} __packed;
+struct cyttsp4_virtual_key {
+	int code;
+};
 
 struct cyttsp4_core_platform_data {
 	int irq_gpio;
@@ -51,7 +49,9 @@ struct cyttsp4_core_platform_data {
 		int on, struct device *dev, atomic_t *ignore_irq);
 	int (*irq_stat)(struct cyttsp4_core_platform_data *pdata,
 		struct device *dev);
-	struct touch_settings *sett[CY_TOUCH_SETTINGS_MAX];
+
+	int n_keys;
+	struct cyttsp4_virtual_key* keys;
 };
 
 struct cyttsp4_platform_data {
