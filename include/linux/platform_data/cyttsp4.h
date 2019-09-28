@@ -24,7 +24,6 @@
 struct touch_framework {
 	const uint16_t  *abs;
 	uint8_t         size;
-	uint8_t         enable_vkeys;
 } __packed;
 
 struct cyttsp4_virtual_key {
