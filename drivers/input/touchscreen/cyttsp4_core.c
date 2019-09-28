@@ -541,8 +541,6 @@ static int cyttsp4_si_get_btn_data(struct cyttsp4 *cd)
 {
 	struct cyttsp4_sysinfo *si = &cd->sysinfo;
 	int btn;
-	int num_defined_keys;
-	u16 *key_table;
 	void *p;
 	int rc = 0;
 
@@ -559,24 +557,10 @@ static int cyttsp4_si_get_btn_data(struct cyttsp4 *cd)
 		}
 		si->btn = p;
 
-		if (cd->cpdata->sett[CY_IC_GRPNUM_BTN_KEYS] == NULL)
-			num_defined_keys = 0;
-		else if (cd->cpdata->sett[CY_IC_GRPNUM_BTN_KEYS]->data == NULL)
-			num_defined_keys = 0;
-		else
-			num_defined_keys = cd->cpdata->sett
-				[CY_IC_GRPNUM_BTN_KEYS]->size;
-
-		for (btn = 0; btn < si->si_ofs.num_btns &&
-			btn < num_defined_keys; btn++) {
-			key_table = (u16 *)cd->cpdata->sett
-				[CY_IC_GRPNUM_BTN_KEYS]->data;
-			si->btn[btn].key_code = key_table[btn];
-			si->btn[btn].state = CY_BTN_RELEASED;
-			si->btn[btn].enabled = true;
-		}
-		for (; btn < si->si_ofs.num_btns; btn++) {
+		for (btn = 0; btn < si->si_ofs.num_btns; btn++) {
 			si->btn[btn].key_code = KEY_RESERVED;
+			if (btn < cd->cpdata->n_keys)
+				si->btn[btn].key_code = cd->cpdata->keys[btn].code;
 			si->btn[btn].state = CY_BTN_RELEASED;
 			si->btn[btn].enabled = true;
 		}
