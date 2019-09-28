@@ -1766,7 +1766,8 @@ static int cyttsp4_core_wake_(struct cyttsp4 *cd)
 		rc = -ENOSYS;
 	}
 	if (rc < 0) {
-		dev_err(dev, "%s: HW Power up fails r=%d\n",
+		if (rc != -ENOSYS)
+			dev_err(dev, "%s: HW Power up fails r=%d\n",
 				__func__, rc);
 
 		/* Initiate a read transaction to wake up */
