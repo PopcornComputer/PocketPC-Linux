@@ -16,8 +16,6 @@
 #define _CYTTSP4_H_
 
 #define CYTTSP4_MT_NAME "cyttsp4_mt"
-#define CYTTSP4_I2C_NAME "cyttsp4_i2c_adapter"
-#define CYTTSP4_SPI_NAME "cyttsp4_spi_adapter"
 
 #define CY_TOUCH_SETTINGS_MAX 32
 
