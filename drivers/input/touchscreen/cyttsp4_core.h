@@ -24,6 +24,8 @@
 #include <linux/stringify.h>
 #include <linux/types.h>
 #include <linux/platform_data/cyttsp4.h>
+#include <linux/regulator/consumer.h>
+#include <linux/gpio.h>
 
 #define CY_REG_BASE			0x00
 
@@ -329,12 +331,19 @@ struct cyttsp4 {
 	bool is_suspended;
 	char phys[NAME_MAX];
 	int num_prv_tch;
-	struct cyttsp4_platform_data *pdata;
 	const struct cyttsp4_bus_ops *bus_ops;
 	u8 *xfer_buf;
 #ifdef VERBOSE_DEBUG
 	u8 pr_buf[CY_MAX_PRBUF_SIZE];
 #endif
+	int flags;
+	int n_signals;
+	struct cyttsp4_signal_def *signals;
+	int n_keys;
+	struct cyttsp4_virtual_key* keys;
+	struct gpio_desc *reset_gpio;
+	struct gpio_desc *power_gpio;
+	struct regulator *vdd_supply;
 };
 
 struct cyttsp4_bus_ops {
@@ -391,6 +400,31 @@ enum cyttsp4_event_id {
 
 /* y-axis, 0:origin is on top side of panel, 1: bottom */
 #define CY_PCFG_ORIGIN_Y_MASK		0x80
+
+/* abs axis signal offsets in the signals array  */
+enum cyttsp4_sig_ost {
+	CY_ABS_X_OST,
+	CY_ABS_Y_OST,
+	CY_ABS_P_OST,
+	CY_ABS_W_OST,
+	CY_ABS_ID_OST,
+	CY_ABS_MAJ_OST,
+	CY_ABS_MIN_OST,
+	CY_ABS_OR_OST,
+	CY_NUM_ABS_OST	/* number of abs signals */
+};
+
+struct cyttsp4_virtual_key {
+	int code;
+};
+
+struct cyttsp4_signal_def {
+	int signal;
+	int min;
+	int max;
+	int fuzz;
+	int flat;
+};
 
 static inline int cyttsp4_adap_read(struct cyttsp4 *ts, u16 addr, int size,
 		void *buf)
