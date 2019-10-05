@@ -56,6 +56,15 @@ config REGULATOR_USERSPACE_CONSUMER
 
 	  If unsure, say no.
 
+config REGULATOR_USERSPACE_CONSUMER_OF
+	tristate "Userspace regulator consumer support (OF)"
+	help
+	  There are some classes of devices that are controlled entirely
+	  from user space. Userspace consumer driver provides ability to
+	  control power supplies for such devices.
+
+	  If unsure, say no.
+
 config REGULATOR_88PG86X
 	tristate "Marvell 88PG86X voltage regulators"
 	depends on I2C
