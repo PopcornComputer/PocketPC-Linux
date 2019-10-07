@@ -1460,6 +1460,7 @@ cyttsp4_timer_watchdog_exit_error:
 	return;
 }
 
+#if 0
 static int cyttsp4_set_power(struct cyttsp4* cd, int on)
 {
 	dev_dbg(cd->dev, "Power %s\n", on ? "up" : "down");
@@ -1475,6 +1476,7 @@ static int cyttsp4_set_power(struct cyttsp4* cd, int on)
 
 	return -ENOSYS;
 }
+#endif
 
 static int cyttsp4_core_sleep_(struct cyttsp4 *cd)
 {
@@ -1743,12 +1745,12 @@ static int cyttsp4_core_sleep(struct cyttsp4 *cd)
 
 static int cyttsp4_core_wake_(struct cyttsp4 *cd)
 {
+#if 0
 	struct device *dev = cd->dev;
 	int rc;
 	u8 mode;
 	int t;
 
-#if 0
 	/* Already woken? */
 	mutex_lock(&cd->system_lock);
 	if (cd->sleep_state == SS_SLEEP_OFF) {
