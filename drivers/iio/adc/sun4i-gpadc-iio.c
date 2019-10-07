@@ -622,7 +622,8 @@ static int sun4i_gpadc_probe(struct platform_device *pdev)
 	indio_dev->info = &sun4i_gpadc_iio_info;
 	indio_dev->modes = INDIO_DIRECT_MODE;
 
-	if (pdev->dev.of_node)
+	if (pdev->dev.of_node && of_match_node(sun4i_gpadc_of_id,
+					       pdev->dev.of_node))
 		ret = sun4i_gpadc_probe_dt(pdev, indio_dev);
 	else
 		ret = sun4i_gpadc_probe_mfd(pdev, indio_dev);
