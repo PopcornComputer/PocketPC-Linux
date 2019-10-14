@@ -62,7 +62,7 @@ enum cyttsp_cmd_bits {
 };
 
 /* Timeout in ms. */
-#define CY_WATCHDOG_TIMEOUT		1000
+#define CY_WATCHDOG_TIMEOUT		10000
 
 #define CY_MAX_PRINT_SIZE		512
 #ifdef VERBOSE_DEBUG
@@ -316,6 +316,7 @@ struct cyttsp4 {
 	enum cyttsp4_startup_state startup_state;
 	int int_status;
 	wait_queue_head_t wait_q;
+	struct workqueue_struct *wq;
 	int irq;
 	struct work_struct startup_work;
 	struct work_struct watchdog_work;
