@@ -16,6 +16,7 @@
 #include <linux/platform_device.h>
 #include <linux/of_platform.h>
 #include <linux/reset/sunxi.h>
+#include <linux/scpi_protocol.h>
 #include <linux/suspend.h>
 
 #include <asm/mach/arch.h>
@@ -99,8 +100,18 @@ static int sun8i_a83t_pm_valid(suspend_state_t state)
 
 static int sun8i_a83t_suspend_finish(unsigned long val)
 {
-	// don't do much
-	cpu_do_idle();
+	struct scpi_ops *scpi;
+
+	scpi = get_scpi_ops();
+	if (scpi && scpi->sys_set_power_state) {
+		//HACK: use invalid state to mean: suspend last CPU and the system
+		scpi->sys_set_power_state(3);
+		cpu_do_idle();
+	} else {
+		// don't do much if scpi is not available
+		cpu_do_idle();
+	}
+
 	return 0;
 }
 
