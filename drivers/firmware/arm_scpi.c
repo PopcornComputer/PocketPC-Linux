@@ -813,6 +813,7 @@ struct scpi_ops *get_scpi_ops(void)
 }
 EXPORT_SYMBOL_GPL(get_scpi_ops);
 
+__maybe_unused
 static int scpi_init_versions(struct scpi_drvinfo *info)
 {
 	int ret;
@@ -1011,12 +1012,13 @@ static int scpi_probe(struct platform_device *pdev)
 				scpi_info->cmd_priority);
 	}
 
+	/*
 	ret = scpi_init_versions(scpi_info);
 	if (ret) {
 		dev_err(dev, "incorrect or no SCP firmware found\n");
 		return ret;
 	}
-
+          */
 	if (scpi_info->is_legacy && !scpi_info->protocol_version &&
 	    !scpi_info->firmware_version)
 		dev_info(dev, "SCP Protocol legacy pre-1.0 firmware\n");
