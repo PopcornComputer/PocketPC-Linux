@@ -316,29 +316,26 @@ static int _sunxi_rsb_run_xfer(struct sunxi_rsb *rsb)
 	return 0;
 }
 
-static int sunxi_rsb_read(struct sunxi_rsb *rsb, u8 rtaddr, u8 addr,
-			  u32 *buf, size_t len)
+/* RSB regmap functions */
+struct sunxi_rsb_ctx {
+	struct sunxi_rsb_device *rdev;
+	u32 mask;
+	u8 rd_cmd;
+	u8 wr_cmd;
+};
+
+static int regmap_sunxi_rsb_reg_read(void *context, unsigned int reg,
+				     unsigned int *val)
 {
-	u32 cmd;
+	struct sunxi_rsb_ctx *ctx = context;
+	struct sunxi_rsb_device *rdev = ctx->rdev;
+	struct sunxi_rsb *rsb = rdev->rsb;
 	int ret;
 
-	if (!buf)
+	if (!val)
 		return -EINVAL;
-
-	switch (len) {
-	case 1:
-		cmd = RSB_CMD_RD8;
-		break;
-	case 2:
-		cmd = RSB_CMD_RD16;
-		break;
-	case 4:
-		cmd = RSB_CMD_RD32;
-		break;
-	default:
-		dev_err(rsb->dev, "Invalid access width: %zd\n", len);
+	if (reg > 0xff)
 		return -EINVAL;
-	}
 
 	ret = pm_runtime_resume_and_get(rsb->dev);
 	if (ret)
@@ -346,15 +343,15 @@ static int sunxi_rsb_read(struct sunxi_rsb *rsb, u8 rtaddr, u8 addr,
 
 	mutex_lock(&rsb->lock);
 
-	writel(addr, rsb->regs + RSB_ADDR);
-	writel(RSB_DAR_RTA(rtaddr), rsb->regs + RSB_DAR);
-	writel(cmd, rsb->regs + RSB_CMD);
+	writel(reg, rsb->regs + RSB_ADDR);
+	writel(RSB_DAR_RTA(rdev->rtaddr), rsb->regs + RSB_DAR);
+	writel(ctx->rd_cmd, rsb->regs + RSB_CMD);
 
 	ret = _sunxi_rsb_run_xfer(rsb);
 	if (ret)
 		goto unlock;
 
-	*buf = readl(rsb->regs + RSB_DATA) & GENMASK(len * 8 - 1, 0);
+	*val = readl(rsb->regs + RSB_DATA) & ctx->mask;
 
 unlock:
 	mutex_unlock(&rsb->lock);
@@ -365,29 +362,16 @@ unlock:
 	return ret;
 }
 
-static int sunxi_rsb_write(struct sunxi_rsb *rsb, u8 rtaddr, u8 addr,
-			   const u32 *buf, size_t len)
+static int regmap_sunxi_rsb_reg_write(void *context, unsigned int reg,
+				      unsigned int val)
 {
-	u32 cmd;
+	struct sunxi_rsb_ctx *ctx = context;
+	struct sunxi_rsb_device *rdev = ctx->rdev;
+	struct sunxi_rsb *rsb = rdev->rsb;
 	int ret;
 
-	if (!buf)
+	if (reg > 0xff)
 		return -EINVAL;
-
-	switch (len) {
-	case 1:
-		cmd = RSB_CMD_WR8;
-		break;
-	case 2:
-		cmd = RSB_CMD_WR16;
-		break;
-	case 4:
-		cmd = RSB_CMD_WR32;
-		break;
-	default:
-		dev_err(rsb->dev, "Invalid access width: %zd\n", len);
-		return -EINVAL;
-	}
 
 	ret = pm_runtime_resume_and_get(rsb->dev);
 	if (ret)
@@ -395,10 +379,11 @@ static int sunxi_rsb_write(struct sunxi_rsb *rsb, u8 rtaddr, u8 addr,
 
 	mutex_lock(&rsb->lock);
 
-	writel(addr, rsb->regs + RSB_ADDR);
-	writel(RSB_DAR_RTA(rtaddr), rsb->regs + RSB_DAR);
-	writel(*buf, rsb->regs + RSB_DATA);
-	writel(cmd, rsb->regs + RSB_CMD);
+	writel(reg, rsb->regs + RSB_ADDR);
+	writel(RSB_DAR_RTA(rdev->rtaddr), rsb->regs + RSB_DAR);
+	writel(val, rsb->regs + RSB_DATA);
+	writel(ctx->wr_cmd, rsb->regs + RSB_CMD);
+
 	ret = _sunxi_rsb_run_xfer(rsb);
 
 	mutex_unlock(&rsb->lock);
@@ -407,36 +392,6 @@ static int sunxi_rsb_write(struct sunxi_rsb *rsb, u8 rtaddr, u8 addr,
 	pm_runtime_put_autosuspend(rsb->dev);
 
 	return ret;
-}
-
-/* RSB regmap functions */
-struct sunxi_rsb_ctx {
-	struct sunxi_rsb_device *rdev;
-	int size;
-};
-
-static int regmap_sunxi_rsb_reg_read(void *context, unsigned int reg,
-				     unsigned int *val)
-{
-	struct sunxi_rsb_ctx *ctx = context;
-	struct sunxi_rsb_device *rdev = ctx->rdev;
-
-	if (reg > 0xff)
-		return -EINVAL;
-
-	return sunxi_rsb_read(rdev->rsb, rdev->rtaddr, reg, val, ctx->size);
-}
-
-static int regmap_sunxi_rsb_reg_write(void *context, unsigned int reg,
-				      unsigned int val)
-{
-	struct sunxi_rsb_ctx *ctx = context;
-	struct sunxi_rsb_device *rdev = ctx->rdev;
-
-	if (reg > 0xff)
-		return -EINVAL;
-
-	return sunxi_rsb_write(rdev->rsb, rdev->rtaddr, reg, &val, ctx->size);
 }
 
 static void regmap_sunxi_rsb_free_ctx(void *context)
@@ -458,13 +413,24 @@ static struct sunxi_rsb_ctx *regmap_sunxi_rsb_init_ctx(struct sunxi_rsb_device *
 		const struct regmap_config *config)
 {
 	struct sunxi_rsb_ctx *ctx;
+	u8 rd_cmd, wr_cmd;
 
 	switch (config->val_bits) {
 	case 8:
+		rd_cmd = RSB_CMD_RD8;
+		wr_cmd = RSB_CMD_WR8;
+		break;
 	case 16:
+		rd_cmd = RSB_CMD_RD16;
+		wr_cmd = RSB_CMD_WR16;
+		break;
 	case 32:
+		rd_cmd = RSB_CMD_RD32;
+		wr_cmd = RSB_CMD_WR32;
 		break;
 	default:
+		dev_err(&rdev->dev, "Invalid RSB access width: %d\n",
+			config->val_bits);
 		return ERR_PTR(-EINVAL);
 	}
 
@@ -473,7 +439,9 @@ static struct sunxi_rsb_ctx *regmap_sunxi_rsb_init_ctx(struct sunxi_rsb_device *
 		return ERR_PTR(-ENOMEM);
 
 	ctx->rdev = rdev;
-	ctx->size = config->val_bits / 8;
+	ctx->mask = GENMASK(config->val_bits - 1, 0);
+	ctx->rd_cmd = rd_cmd;
+	ctx->wr_cmd = wr_cmd;
 
 	return ctx;
 }
