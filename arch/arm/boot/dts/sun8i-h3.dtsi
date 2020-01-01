@@ -170,6 +170,19 @@
 			#size-cells = <1>;
 			ranges;
 
+			sram_a2: sram@40000 {
+				compatible = "mmio-sram";
+				reg = <0x00040000 0xc000>;
+				#address-cells = <1>;
+				#size-cells = <1>;
+				ranges = <0 0x00040000 0xc000>;
+
+				scpi_sram: scp-shmem@bc00 {
+					compatible = "arm,scp-shmem";
+					reg = <0xbc00 0x200>;
+				};
+			};
+
 			sram_c: sram@1d00000 {
 				compatible = "mmio-sram";
 				reg = <0x01d00000 0x80000>;
