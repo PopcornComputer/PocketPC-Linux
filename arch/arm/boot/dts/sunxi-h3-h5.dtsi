@@ -105,6 +105,13 @@
 		status = "disabled";
 	};
 
+	scpi_protocol: scpi {
+		compatible = "arm,scpi";
+		mboxes = <&msgbox 2>, <&msgbox 3>;
+		mbox-names = "tx", "rx";
+		shmem = <&scpi_sram>;
+	};
+
 	soc {
 		compatible = "simple-bus";
 		#address-cells = <1>;
