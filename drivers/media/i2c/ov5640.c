@@ -2327,6 +2327,7 @@ static int ov5640_set_mode(struct ov5640_dev *sensor)
 	bool auto_gain = sensor->ctrls.auto_gain->val == 1;
 	bool auto_exp =  sensor->ctrls.auto_exp->val == V4L2_EXPOSURE_AUTO;
 	int ret;
+	u8 tmp;
 
 	dn_mode = mode->dn_mode;
 	orig_dn_mode = orig_mode->dn_mode;
@@ -2388,6 +2389,22 @@ static int ov5640_set_mode(struct ov5640_dev *sensor)
 		return ret;
 	ret = ov5640_set_virtual_channel(sensor);
 	if (ret < 0)
+		return ret;
+
+	ret = ov5640_read_reg(sensor, 0x5308, &tmp);
+	if (ret)
+		return ret;
+
+	ret = ov5640_write_reg(sensor, 0x5308, tmp | 0x10 | 0x40);
+	if (ret)
+		return ret;
+
+	ret = ov5640_write_reg(sensor, 0x5306, 0);
+	if (ret)
+		return ret;
+
+	ret = ov5640_write_reg(sensor, 0x5302, 0);
+	if (ret)
 		return ret;
 
 	sensor->pending_mode_change = false;
