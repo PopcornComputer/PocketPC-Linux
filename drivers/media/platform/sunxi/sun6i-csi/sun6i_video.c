@@ -413,6 +413,8 @@ static int vidioc_try_fmt_vid_cap(struct file *file, void *priv,
 	return sun6i_video_try_fmt(video, f);
 }
 
+//XXX: allow to change cameras/media graph setup via this api?
+// probably pointless...
 static int vidioc_enum_input(struct file *file, void *fh,
 			     struct v4l2_input *inp)
 {
