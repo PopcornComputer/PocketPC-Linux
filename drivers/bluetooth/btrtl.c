@@ -653,7 +653,7 @@ struct btrtl_device_info *btrtl_initialize(struct hci_dev *hdev,
 	struct btrtl_device_info *btrtl_dev;
 	struct sk_buff *skb;
 	struct hci_rp_read_local_version *resp;
-	char cfg_name[40];
+	char cfg_name[128];
 	u16 hci_rev, lmp_subver;
 	u8 hci_ver, chip_type = 0;
 	int ret;
