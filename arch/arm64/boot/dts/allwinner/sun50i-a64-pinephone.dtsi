@@ -181,6 +181,7 @@
 	bt_sco_codec: bt-sco-codec {
 		#sound-dai-cells = <1>;
 		compatible = "linux,bt-sco";
+		sound-name-prefix = "Bluetooth";
 	};
 
 	chosen {
