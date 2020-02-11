@@ -918,6 +918,16 @@ static const struct snd_soc_dapm_route ac100_codec_routes[] = {
 	{ "LINEOUT", NULL, "Line Out" },
 };
 
+static int ac100_codec_set_bias_level(struct snd_soc_component *component,
+				      enum snd_soc_bias_level level)
+{
+	if (level == SND_SOC_BIAS_OFF) {
+		pr_err("XX: idle bias off\n");
+	}
+
+	return 0;
+}
+
 static const struct snd_soc_component_driver ac100_codec_analog_cmpnt_drv = {
 	.controls		= ac100_codec_controls,
 	.num_controls		= ARRAY_SIZE(ac100_codec_controls),
@@ -925,6 +935,7 @@ static const struct snd_soc_component_driver ac100_codec_analog_cmpnt_drv = {
 	.num_dapm_widgets	= ARRAY_SIZE(ac100_codec_widgets),
 	.dapm_routes		= ac100_codec_routes,
 	.num_dapm_routes	= ARRAY_SIZE(ac100_codec_routes),
+	.set_bias_level		= ac100_codec_set_bias_level,
 };
 
 static int ac100_codec_probe(struct platform_device *pdev)
