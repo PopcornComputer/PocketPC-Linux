@@ -1594,20 +1594,13 @@ static irqreturn_t sun8i_codec_jack_irq(int irq, void *dev_id)
 static int sun8i_codec_ac100_regmap_read(void *context, unsigned int reg, unsigned int *val)
 {
 	struct sun8i_codec *scodec = context;
-	int ret;
 
-	ret = regmap_read(scodec->ac100_regmap, reg / 4, val);
-	if (ret == 0)
-		pr_err("R%02x => %04x\n", reg / 4, *val);
-
-	return ret;
+	return regmap_read(scodec->ac100_regmap, reg / 4, val);
 }
 
 static int sun8i_codec_ac100_regmap_write(void *context, unsigned int reg, unsigned int val)
 {
 	struct sun8i_codec *scodec = context;
-
-	pr_err("W%02x <= %04x\n", reg / 4, val);
 
 	return regmap_write(scodec->ac100_regmap, reg / 4, val);
 }
