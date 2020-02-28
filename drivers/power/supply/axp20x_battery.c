@@ -181,6 +181,25 @@ static int axp20x_get_constant_charge_current(struct axp20x_batt_ps *axp,
 	return 0;
 }
 
+static int axp20x_get_ocv_voltage(struct axp20x_batt_ps *axp, int *val)
+{
+	int ret;
+	unsigned int ocvh, ocvl, ocv;
+
+	ret = regmap_read(axp->regmap, AXP288_FG_OCVH_REG, &ocvh);
+	if (ret)
+		return ret;
+
+	ret = regmap_read(axp->regmap, AXP288_FG_OCVL_REG, &ocvl);
+	if (ret)
+		return ret;
+
+	ocv = ocvh << 4 | (ocvl & 0xf);
+
+	*val = ocv * 1100;
+	return 0;
+}
+
 static int axp20x_battery_get_prop(struct power_supply *psy,
 				   enum power_supply_property psp,
 				   union power_supply_propval *val)
@@ -278,6 +297,9 @@ static int axp20x_battery_get_prop(struct power_supply *psy,
 		/* IIO framework gives mA but Power Supply framework gives uA */
 		val->intval *= 1000;
 		break;
+
+	case POWER_SUPPLY_PROP_VOLTAGE_OCV:
+		return axp20x_get_ocv_voltage(axp20x_batt, &val->intval);
 
 	case POWER_SUPPLY_PROP_CAPACITY:
 		/* When no battery is present, return capacity is 100% */
@@ -500,6 +522,7 @@ static enum power_supply_property axp20x_battery_props[] = {
 	POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT,
 	POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT_MAX,
 	POWER_SUPPLY_PROP_HEALTH,
+	POWER_SUPPLY_PROP_VOLTAGE_OCV,
 	POWER_SUPPLY_PROP_VOLTAGE_MAX_DESIGN,
 	POWER_SUPPLY_PROP_VOLTAGE_MIN_DESIGN,
 	POWER_SUPPLY_PROP_CAPACITY,
