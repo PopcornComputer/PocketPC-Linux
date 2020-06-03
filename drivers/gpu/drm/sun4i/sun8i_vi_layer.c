@@ -23,6 +23,7 @@ static void sun8i_vi_layer_enable(struct sun8i_mixer *mixer, int channel,
 {
 	u32 val, bld_base, ch_base;
 	unsigned int old_pipe_ch;
+	unsigned  tmp;
 
 	bld_base = sun8i_blender_base(mixer);
 	ch_base = sun8i_channel_base(mixer, channel);
@@ -95,6 +96,10 @@ static void sun8i_vi_layer_enable(struct sun8i_mixer *mixer, int channel,
 
 		DRM_DEBUG_DRIVER("  enable pipe %d <- ch %d\n", zpos, channel);
 	}
+
+	regmap_read(mixer->engine.regs,
+			   SUN8I_MIXER_CHAN_VI_LAYER_ATTR(ch_base, overlay), &tmp);
+	DRM_DEBUG_DRIVER("  post-en-dis %08x\n", tmp);
 }
 
 static void sun8i_vi_layer_update_alpha(struct sun8i_mixer *mixer, int channel,
@@ -294,6 +299,7 @@ static int sun8i_vi_layer_update_formats(struct sun8i_mixer *mixer, int channel,
 	struct drm_plane_state *state = plane->state;
 	u32 val, ch_base, csc_mode, hw_fmt;
 	const struct drm_format_info *fmt;
+	unsigned  tmp;
 	int ret;
 
 	ch_base = sun8i_channel_base(mixer, channel);
@@ -305,10 +311,18 @@ static int sun8i_vi_layer_update_formats(struct sun8i_mixer *mixer, int channel,
 		return ret;
 	}
 
+	regmap_read(mixer->engine.regs,
+			   SUN8I_MIXER_CHAN_VI_LAYER_ATTR(ch_base, overlay), &tmp);
+	DRM_DEBUG_DRIVER("  pre-format %08x\n", tmp);
+
 	val = hw_fmt << SUN8I_MIXER_CHAN_VI_LAYER_ATTR_FBFMT_OFFSET;
 	regmap_update_bits(mixer->engine.regs,
 			   SUN8I_MIXER_CHAN_VI_LAYER_ATTR(ch_base, overlay),
 			   SUN8I_MIXER_CHAN_VI_LAYER_ATTR_FBFMT_MASK, val);
+
+	regmap_read(mixer->engine.regs,
+			   SUN8I_MIXER_CHAN_VI_LAYER_ATTR(ch_base, overlay), &tmp);
+	DRM_DEBUG_DRIVER("  mid1-format %08x\n", tmp);
 
 	csc_mode = sun8i_vi_layer_get_csc_mode(fmt);
 	if (csc_mode != SUN8I_CSC_MODE_OFF) {
@@ -320,6 +334,10 @@ static int sun8i_vi_layer_update_formats(struct sun8i_mixer *mixer, int channel,
 		sun8i_csc_enable_ccsc(mixer, channel, false);
 	}
 
+	regmap_read(mixer->engine.regs,
+			   SUN8I_MIXER_CHAN_VI_LAYER_ATTR(ch_base, overlay), &tmp);
+	DRM_DEBUG_DRIVER("  mid2-format %08x\n", tmp);
+
 	if (!fmt->is_yuv)
 		val = SUN8I_MIXER_CHAN_VI_LAYER_ATTR_RGB_MODE;
 	else
@@ -328,6 +346,10 @@ static int sun8i_vi_layer_update_formats(struct sun8i_mixer *mixer, int channel,
 	regmap_update_bits(mixer->engine.regs,
 			   SUN8I_MIXER_CHAN_VI_LAYER_ATTR(ch_base, overlay),
 			   SUN8I_MIXER_CHAN_VI_LAYER_ATTR_RGB_MODE, val);
+
+	regmap_read(mixer->engine.regs,
+			   SUN8I_MIXER_CHAN_VI_LAYER_ATTR(ch_base, overlay), &tmp);
+	DRM_DEBUG_DRIVER("  post-format %08x\n", tmp);
 
 	return 0;
 }
