@@ -273,6 +273,8 @@
 		reg = <0x18>;
 		interrupt-parent = <&pio>;
 		interrupts = <7 10 IRQ_TYPE_EDGE_RISING>; /* PH10 / EINT10 */
+		vdd-supply = <&reg_dcdc1>;
+		vddio-supply = <&reg_dcdc1>;
 	};
 
 	/* NFC (NPC 100) */
