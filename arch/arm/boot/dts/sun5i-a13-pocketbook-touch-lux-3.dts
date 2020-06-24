@@ -132,6 +132,7 @@
 	pcf8563: rtc@51 {
 		compatible = "nxp,pcf8563";
 		reg = <0x51>;
+		#clock-cells = <0>;
 	};
 
 	// hacky PMIC driver for eInk display
