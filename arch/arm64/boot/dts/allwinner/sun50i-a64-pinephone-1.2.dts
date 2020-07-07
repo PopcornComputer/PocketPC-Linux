@@ -48,7 +48,67 @@
 	mmc-pwrseq = <&wifi_pwrseq>;
 };
 
+&i2c0 {
+	hdmi-bridge@28 {
+		compatible = "analogix,anx7688";
+		reg = <0x28>;
+
+		interrupt-parent = <&r_pio>;
+		interrupts = <0 11 IRQ_TYPE_EDGE_FALLING>; /* PL11 */
+
+		enable-gpios = <&pio 3 10 GPIO_ACTIVE_LOW>; /* PD10 */
+		reset-gpios = <&pio 3 6 GPIO_ACTIVE_HIGH>; /* PD6 */
+
+		cabledet-gpios = <&r_pio 0 8 GPIO_ACTIVE_HIGH>; /* PL8 */
+
+		avdd10-supply = <&reg_anx1v0>;
+		dvdd10-supply = <&reg_anx1v0>;
+		avdd18-supply = <&reg_ldo_io1>;
+		dvdd18-supply = <&reg_ldo_io1>;
+		avdd33-supply = <&reg_dcdc1>;
+		vconn-supply = <&reg_vconn5v0>;
+		hdmi_vt-supply = <&reg_dldo1>;
+
+		source-caps = <
+			PDO_FIXED(5000, 500, PDO_FIXED_DATA_SWAP | PDO_FIXED_USB_COMM | PDO_FIXED_DUAL_ROLE)
+		>;
+
+		sink-caps = <
+			PDO_FIXED(5000, 3000, PDO_FIXED_DATA_SWAP | PDO_FIXED_USB_COMM | PDO_FIXED_DUAL_ROLE)
+		>;
+
+		/*
+		 * ANX7688 will enable/disable USB-5V <-> DCIN switch by itself
+		 * via VBUS_CTRL pin. The driver just has to enable the USB-5V
+		 * so that the switch has power.
+		 */
+		vbus-supply = <&reg_usb_5v>;
+		vbus_in-supply = <&usb_power_supply>;
+
+		port {
+			typec0_dr_sw: endpoint {
+				remote-endpoint = <&usb0_drd_sw>;
+			};
+		};
+	};
+};
+
+&reg_anx1v0 {
+	gpio = <&pio 3 11 GPIO_ACTIVE_HIGH>; /* PD11 */
+	enable-active-high;
+};
+
 &sgm3140 {
 	enable-gpios = <&pio 3 24 GPIO_ACTIVE_HIGH>; /* PD24 */
 	flash-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>; /* PC3 */
+};
+
+&usbphy {
+	usb-role-switch;
+
+	port {
+		usb0_drd_sw: endpoint {
+			remote-endpoint = <&typec0_dr_sw>;
+		};
+	};
 };
