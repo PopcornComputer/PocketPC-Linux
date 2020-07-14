@@ -679,7 +679,8 @@ static int cw_bat_probe(struct i2c_client *client)
 						    &cw2015_bat_desc,
 						    &psy_cfg);
 	if (IS_ERR(cw_bat->rk_bat)) {
-		dev_err(cw_bat->dev, "Failed to register power supply\n");
+		if (PTR_ERR(cw_bat->rk_bat) != -EPROBE_DEFER)
+			dev_err(cw_bat->dev, "Failed to register power supply\n");
 		return PTR_ERR(cw_bat->rk_bat);
 	}
 
