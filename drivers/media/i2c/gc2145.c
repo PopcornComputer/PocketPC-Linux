@@ -187,6 +187,11 @@ static const struct gc2145_pixfmt gc2145_formats[] = {
 		.colorspace        = V4L2_COLORSPACE_SRGB,
 		.fmt_setup         = 0x06,
 	},
+	{
+		.code              = MEDIA_BUS_FMT_SBGGR8_1X8,
+		.colorspace        = V4L2_COLORSPACE_RAW,
+		.fmt_setup         = 0x17,
+	},
 };
 
 static const struct gc2145_pixfmt *gc2145_find_format(u32 code)
