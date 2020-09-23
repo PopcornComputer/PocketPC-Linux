@@ -43,6 +43,10 @@
 	default-brightness-level = <400>;
 };
 
+&codec_analog {
+	allwinner,internal-bias-resistor;
+};
+
 &i2c0 {
 	hdmi-bridge@28 {
 		compatible = "analogix,anx7688";
