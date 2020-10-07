@@ -3866,7 +3866,7 @@ static int ov5640_probe(struct i2c_client *client)
 	sensor->current_link_freq =
 		ov5640_csi2_link_freqs[OV5640_DEFAULT_LINK_FREQ];
 
-	sensor->ae_target = 52;
+	sensor->ae_target = 28;
 
 	endpoint = fwnode_graph_get_next_endpoint(dev_fwnode(&client->dev),
 						  NULL);
