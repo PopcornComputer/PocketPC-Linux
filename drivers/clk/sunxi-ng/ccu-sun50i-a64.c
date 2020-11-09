@@ -4,6 +4,7 @@
  */
 
 #include <linux/clk-provider.h>
+#include <linux/delay.h>
 #include <linux/io.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
@@ -23,13 +24,14 @@
 
 #include "ccu-sun50i-a64.h"
 
+#define SUN50I_A64_PLL_CPUX_REG		0x000
 static struct ccu_nkmp pll_cpux_clk = {
 	.enable		= BIT(31),
 	.lock		= BIT(28),
 	.n		= _SUNXI_CCU_MULT(8, 5),
 	.k		= _SUNXI_CCU_MULT(4, 2),
-	.m		= _SUNXI_CCU_DIV(0, 2),
-	.p		= _SUNXI_CCU_DIV_MAX(16, 2, 4),
+	.m		= _SUNXI_CCU_DIV_MAX(0, 2, 1),
+	.p		= _SUNXI_CCU_DIV_MAX(16, 2, 1),
 	.common		= {
 		.reg		= 0x000,
 		.hw.init	= CLK_HW_INIT("pll-cpux",
@@ -235,6 +237,7 @@ static SUNXI_CCU_NM_WITH_GATE_LOCK(pll_ddr1_clk, "pll-ddr1",
 				   BIT(28),	/* lock */
 				   CLK_SET_RATE_UNGATE);
 
+#define SUN50I_A64_CPUX_AXI_REG		0x050
 static const char * const cpux_parents[] = { "osc32k", "osc24M",
 					     "pll-cpux", "pll-cpux" };
 static SUNXI_CCU_MUX(cpux_clk, "cpux", cpux_parents,
@@ -1005,6 +1008,78 @@ static int sun50i_a64_ccu_probe(struct platform_device *pdev)
 	val = readl(reg + SUN50I_A64_TCON0_REG);
 	val &= ~GENMASK(26, 24);
 	writel(val | (0 << 24), reg + SUN50I_A64_TCON0_REG);
+
+	/* Disable any possible dividers on PLL-CPUX */
+	val = readl(reg + SUN50I_A64_PLL_CPUX_REG);
+	if (val & (GENMASK(17, 16) | GENMASK(1, 0))) {
+		unsigned int n, k, m, p;
+
+		n = ((val & GENMASK(12, 8)) >> 8) + 1;
+		k = ((val & GENMASK(5, 4)) >> 4) + 1;
+		m = (val & GENMASK(1, 0)) + 1;
+		p = 1 << ((val & GENMASK(17, 16)) >> 16);
+
+		/*
+		 * Known mainline U-Boot revisions never uses
+		 * divider p, and it will only use m when k = 3 or 4.
+		 * Specially judge for these cases, to satisfy
+		 * what will most possibly happen.
+		 * For m = 2 and k = 3, fractional change will be
+		 * applied to n, to mostly keep the clock rate.
+		 * For m = 2 and k = 4, just change to m = 1 and k = 2.
+		 * For other cases, just try to divide it from N.
+		 */
+		if (p >= 2) {
+			n /= p;
+			p = 1;
+		}
+
+		if (m == 2) {
+			if (k == 3) {
+				k = 2;
+				n = n * 3 / 4;
+				m = 1;
+			}
+			if (k == 4) {
+				k = 2;
+				m = 1;
+			}
+		}
+
+		if (m >= 2) {
+			n /= m;
+			m = 1;
+		}
+
+		/* The user manual constrains n*k >= 10 */
+		if (n * k < 10) {
+			n = 10;
+			k = 1;
+		}
+
+		/* Switch CPUX clock to osc24M temporarily */
+		val = readl(reg + SUN50I_A64_CPUX_AXI_REG);
+		val &= ~GENMASK(17, 16);
+		val |= (1 << 16);
+		writel(val, reg + SUN50I_A64_CPUX_AXI_REG);
+		udelay(1);
+
+		/* Setup PLL-CPUX with new factors */
+		val = ((n - 1) << 8) | ((k - 1) << 4);
+		writel(val, reg + SUN50I_A64_PLL_CPUX_REG);
+		val |= BIT(31);
+		writel(val, reg + SUN50I_A64_PLL_CPUX_REG);
+		do {
+			/* Wait the PLL to lock */
+			val = readl(reg + SUN50I_A64_PLL_CPUX_REG);
+		} while (!(val & BIT(28)));
+
+		/* Switch CPUX clock back to PLL-CPUX */
+		val = readl(reg + SUN50I_A64_CPUX_AXI_REG);
+		val &= ~GENMASK(17, 16);
+		val |= (2 << 16);
+		writel(val, reg + SUN50I_A64_CPUX_AXI_REG);
+	}
 
 	ret = devm_sunxi_ccu_probe(&pdev->dev, reg, &sun50i_a64_ccu_desc);
 	if (ret)
