@@ -955,20 +955,6 @@ static const struct sunxi_ccu_desc sun50i_a64_ccu_desc = {
 	.num_resets	= ARRAY_SIZE(sun50i_a64_ccu_resets),
 };
 
-static struct ccu_pll_nb sun50i_a64_pll_cpu_nb = {
-	.common	= &pll_cpux_clk.common,
-	/* copy from pll_cpux_clk */
-	.enable	= BIT(31),
-	.lock	= BIT(28),
-};
-
-static struct ccu_mux_nb sun50i_a64_cpu_nb = {
-	.common		= &cpux_clk.common,
-	.cm		= &cpux_clk.mux,
-	.delay_us	= 1, /* > 8 clock cycles at 24 MHz */
-	.bypass_index	= 1, /* index of 24 MHz oscillator */
-};
-
 static struct ccu_rate_reset_nb sun50i_a64_pll_video0_reset_tcon0_nb = {
 	.common		= &pll_video0_clk.common,
 };
@@ -1084,13 +1070,6 @@ static int sun50i_a64_ccu_probe(struct platform_device *pdev)
 	ret = devm_sunxi_ccu_probe(&pdev->dev, reg, &sun50i_a64_ccu_desc);
 	if (ret)
 		return ret;
-
-	/* Gate then ungate PLL CPU after any rate changes */
-	ccu_pll_notifier_register(&sun50i_a64_pll_cpu_nb);
-
-	/* Reparent CPU during PLL CPU rate changes */
-	ccu_mux_notifier_register(pll_cpux_clk.common.hw.clk,
-				  &sun50i_a64_cpu_nb);
 
 	/* Reset the rate of TCON0 clock when PLL-VIDEO0 is changed */
 	sun50i_a64_pll_video0_reset_tcon0_nb.target_clk = tcon0_clk.common.hw.clk;
