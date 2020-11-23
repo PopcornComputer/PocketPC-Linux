@@ -179,6 +179,7 @@ enum {
 	/* config options */
         MPWR_F_DUMB_POWERUP,
         MPWR_F_FASTBOOT_POWERUP,
+        MPWR_F_BLOCKED,
 	/* file */
 	MPWR_F_OPEN,
 	MPWR_F_OVERFLOW,
@@ -1188,6 +1189,9 @@ static ssize_t powered_store(struct device *dev,
 	bool status;
 	int ret;
 
+	if (test_bit(MPWR_F_BLOCKED, mpwr->flags))
+		return -EPERM;
+
 	ret = kstrtobool(buf, &status);
 	if (ret)
 		return ret;
@@ -1204,6 +1208,9 @@ static ssize_t powered_blocking_store(struct device *dev,
 	struct mpwr_dev *mpwr = platform_get_drvdata(to_platform_device(dev));
 	bool status;
 	int ret;
+
+	if (test_bit(MPWR_F_BLOCKED, mpwr->flags))
+		return -EPERM;
 
 	ret = kstrtobool(buf, &status);
 	if (ret)
@@ -1311,6 +1318,9 @@ static ssize_t hard_reset_store(struct device *dev,
 	bool val;
 	int ret;
 
+	if (test_bit(MPWR_F_BLOCKED, mpwr->flags))
+		return -EPERM;
+
 	ret = kstrtobool(buf, &val);
 	if (ret)
 		return ret;
@@ -1399,6 +1409,9 @@ static int mpwr_probe_generic(struct device *dev, struct mpwr_dev **mpwr_out)
 		dev_err(dev, "char-device-name is not configured");
 		return -EINVAL;
 	}
+
+	if (of_property_read_bool(np, "blocked"))
+		set_bit(MPWR_F_BLOCKED, mpwr->flags);
 
 	mpwr->status_pwrkey_multiplexed =
 		of_property_read_bool(np, "status-pwrkey-multiplexed");
