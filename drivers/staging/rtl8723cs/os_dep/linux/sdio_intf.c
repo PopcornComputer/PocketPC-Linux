@@ -18,6 +18,9 @@
 #include <hal_data.h>
 #include <platform_ops.h>
 
+#include <linux/of.h>
+#include <linux/of_irq.h>
+
 #ifndef CONFIG_SDIO_HCI
 #error "CONFIG_SDIO_HCI shall be on!\n"
 #endif
@@ -989,6 +992,9 @@ static int rtw_drv_init(
 #endif
 	PADAPTER padapter = NULL;
 	struct dvobj_priv *dvobj;
+#ifdef CONFIG_OF
+	struct device_node *np;
+#endif
 
 #ifdef CONFIG_PLATFORM_INTEL_BYT
 
@@ -996,7 +1002,6 @@ static int rtw_drv_init(
 	acpi_handle handle;
 	struct acpi_device *adev;
 #endif
-
 #if defined(CONFIG_ACPI) && defined(CONFIG_GPIO_WAKEUP)
 	handle = ACPI_HANDLE(&func->dev);
 
@@ -1024,7 +1029,14 @@ static int rtw_drv_init(
 #endif
 #endif /* CONFIG_PLATFORM_INTEL_BYT */
 
-
+#ifdef CONFIG_OF
+	np = func->dev.of_node;
+	if (np) {
+		/* make sure there are interrupts defined in the node */
+		if (of_find_property(np, "interrupts", NULL))
+			oob_irq = irq_of_parse_and_map(np, 0);
+	}
+#endif
 
 	dvobj = sdio_dvobj_init(func, id);
 	if (dvobj == NULL) {
