@@ -295,7 +295,7 @@ static int anx7688_send_ocm_message(struct anx7688 *anx7688, int cmd,
         int ret = 0, i;
         u8 pdo[32];
 
-        if (data_len > sizeof(pdo) - 3 || data_len < 1) {
+        if (data_len > sizeof(pdo) - 3) {
                 dev_dbg(anx7688->dev,
                         "invalid ocm message length cmd=%d len=%d\n",
                         cmd, data_len);
@@ -305,7 +305,8 @@ static int anx7688_send_ocm_message(struct anx7688 *anx7688, int cmd,
         // prepare pd packet
         pdo[0] = data_len + 1;
         pdo[1] = cmd;
-        memcpy(pdo + 2, data, data_len);
+	if (data_len > 0)
+		memcpy(pdo + 2, data, data_len);
         pdo[2 + data_len] = 0;
         for (i = 0; i < data_len + 2; i++)
                 pdo[data_len + 2] -= pdo[i];
