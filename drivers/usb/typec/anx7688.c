@@ -990,19 +990,33 @@ out_unlock:
 static int anx7688_dr_set(struct typec_port *port, enum typec_data_role role)
 {
         struct anx7688 *anx7688 = typec_get_drvdata(port);
+	int ret = 0;
 
         dev_info(anx7688->dev, "data role set %d\n", role);
 
-        return -ENOTSUPP;
+	if (anx7688->data_role != role) {
+		mutex_lock(&anx7688->lock);
+		ret = anx7688_send_ocm_message(anx7688, ANX7688_OCM_MSG_DSWAP_REQ, 0, 0);
+		mutex_unlock(&anx7688->lock);
+	}
+
+	return ret;
 }
 
 static int anx7688_pr_set(struct typec_port *port, enum typec_role role)
 {
         struct anx7688 *anx7688 = typec_get_drvdata(port);
+	int ret = 0;
 
         dev_info(anx7688->dev, "power role set %d\n", role);
 
-        return -ENOTSUPP;
+	if (anx7688->pwr_role != role) {
+		mutex_lock(&anx7688->lock);
+		ret = anx7688_send_ocm_message(anx7688, ANX7688_OCM_MSG_PSWAP_REQ, 0, 0);
+		mutex_unlock(&anx7688->lock);
+	}
+
+	return ret;
 }
 
 /*
