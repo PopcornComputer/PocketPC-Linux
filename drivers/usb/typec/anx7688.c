@@ -1034,7 +1034,7 @@ static int anx7688_update_status(struct anx7688 *anx7688)
 
 	if (anx7688->last_dp_state == -1 || anx7688->last_dp_state != dp_state) {
 		anx7688->last_dp_state = dp_state;
-		dev_dbg(dev, "dp state changed to 0x%02x\n", dp_state);
+		dev_dbg(dev, "DP state changed to 0x%02x\n", dp_state);
 	}
 
 	vbus_on = !!(status & ANX7688_VBUS_STATUS);
@@ -1042,6 +1042,9 @@ static int anx7688_update_status(struct anx7688 *anx7688)
 	dr_dfp = !!(status & ANX7688_DATA_ROLE_STATUS);
 
 	if (anx7688->vbus_on != vbus_on) {
+		dev_dbg(anx7688->dev, "POWER role change to %s\n",
+			vbus_on ? "SOURCE" : "SINK");
+
 		if (vbus_on) {
 			ret = regulator_enable(anx7688->supplies[ANX7688_VBUS_INDEX].consumer);
 			if (ret) {
@@ -1062,6 +1065,9 @@ static int anx7688_update_status(struct anx7688 *anx7688)
 	}
 
 	if (anx7688->vconn_on != vconn_on) {
+		dev_dbg(anx7688->dev, "VCONN role change to %s\n",
+			vconn_on ? "SOURCE" : "SINK");
+
 		if (vconn_on) {
 			ret = regulator_enable(anx7688->supplies[ANX7688_VCONN_INDEX].consumer);
 			if (ret) {
@@ -1085,8 +1091,8 @@ static int anx7688_update_status(struct anx7688 *anx7688)
 
 	if (usb_role_switch_get_role(anx7688->role_sw) !=
 	    (dr_dfp ? USB_ROLE_HOST : USB_ROLE_DEVICE)) {
-		dev_dbg(anx7688->dev, "data role change requested to %s\n",
-			dr_dfp ? "dfp" : "ufp");
+		dev_dbg(anx7688->dev, "DATA role change requested to %s\n",
+			dr_dfp ? "DFP" : "UFP");
 
 		ret = usb_role_switch_set_role(anx7688->role_sw,
 					       dr_dfp ? USB_ROLE_HOST : USB_ROLE_DEVICE);
