@@ -482,7 +482,7 @@ fw_loaded:
 		goto err_vconoff;
 
         /* auto_pd, try.src, try.sink, goto safe 5V */
-        ret = anx7688_reg_write(anx7688, ANX7688_REG_FEATURE_CTRL, 0x1e);
+        ret = anx7688_reg_write(anx7688, ANX7688_REG_FEATURE_CTRL, 0x1e & ~BIT(2)); // disable try_src
 	if (ret)
 		goto err_vconoff;
 
