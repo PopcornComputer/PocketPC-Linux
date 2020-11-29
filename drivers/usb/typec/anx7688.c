@@ -172,6 +172,12 @@ struct anx7688 {
         struct gpio_desc *gpio_reset;
         struct gpio_desc *gpio_cabledet;
 
+	uint32_t src_caps[8];
+	unsigned n_src_caps;
+
+	uint32_t snk_caps[8];
+	unsigned n_snk_caps;
+
 	unsigned long flags[1];
 
         struct delayed_work work;
@@ -370,7 +376,6 @@ err_poweroff:
 	struct typec_partner_desc desc = {};
         int ret, i;
         u8 fw[2];
-        u32 pdo;
 	const u8 dp_snk_identity[16] = {
 		0x00, 0x00, 0x00, 0xec,	/* snk_id_hdr */
 		0x00, 0x00, 0x00, 0x00,	/* snk_cert */
@@ -380,6 +385,7 @@ err_poweroff:
 	const u8 svid[4] = {
 		0x00, 0x00, 0x01, 0xff,
 	};
+        u32 caps[8];
 
         dev_dbg(anx7688->dev, "cable inserted\n");
 
@@ -477,23 +483,17 @@ fw_loaded:
 	if (ret)
 		goto err_vconoff;
 
-
-	pdo = cpu_to_le32(PDO_FIXED(5000, 500,
-				    PDO_FIXED_DATA_SWAP |
-				    PDO_FIXED_USB_COMM |
-				    PDO_FIXED_DUAL_ROLE));
+	for (i = 0; i < anx7688->n_src_caps; i++)
+		caps[i] = cpu_to_le32(anx7688->src_caps[i]);
 	ret = anx7688_send_ocm_message(anx7688, ANX7688_OCM_MSG_PWR_SRC_CAP,
-				       (u8*)&pdo, sizeof pdo);
+				       (u8*)&caps, 4 * anx7688->n_src_caps);
 	if (ret)
 		goto err_vconoff;
 
-
-	pdo = cpu_to_le32(PDO_FIXED(5000, 3000,
-				    PDO_FIXED_DATA_SWAP |
-				    PDO_FIXED_USB_COMM |
-				    PDO_FIXED_DUAL_ROLE));
+	for (i = 0; i < anx7688->n_snk_caps; i++)
+		caps[i] = cpu_to_le32(anx7688->snk_caps[i]);
 	ret = anx7688_send_ocm_message(anx7688, ANX7688_OCM_MSG_PWR_SNK_CAP,
-				       (u8*)&pdo, sizeof pdo);
+				       (u8*)&caps, 4 * anx7688->n_snk_caps);
 	if (ret)
 		goto err_vconoff;
 
@@ -1533,6 +1533,18 @@ static int anx7688_i2c_probe(struct i2c_client *client,
         anx7688->dev = &client->dev;
         mutex_init(&anx7688->lock);
         INIT_DELAYED_WORK(&anx7688->work, anx7688_work);
+
+	anx7688->n_src_caps = 1;
+	anx7688->src_caps[0] = PDO_FIXED(5000, 500,
+					 PDO_FIXED_DATA_SWAP |
+					 PDO_FIXED_USB_COMM |
+					 PDO_FIXED_DUAL_ROLE);
+
+	anx7688->n_snk_caps = 1;
+	anx7688->snk_caps[0] = PDO_FIXED(5000, 3000,
+					 PDO_FIXED_DATA_SWAP |
+					 PDO_FIXED_USB_COMM |
+					 PDO_FIXED_DUAL_ROLE);
 
         for (i = 0; i < ANX7688_NUM_SUPPLIES; i++)
                 anx7688->supplies[i].supply = anx7688_supply_names[i];
