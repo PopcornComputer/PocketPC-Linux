@@ -449,43 +449,30 @@ static int axp20x_usb_power_set_voltage_min(struct axp20x_usb_power *power,
 	return -EINVAL;
 }
 
+static const unsigned axp813_input_current_limits_table[] = {
+	100000,
+	500000,
+	900000,
+	1500000,
+	2000000,
+	2500000,
+	3000000,
+	3500000,
+	4000000,
+};
+
 static int
 axp813_usb_power_set_input_current_limit(struct axp20x_usb_power *power,
 					 int intval)
 {
 	unsigned int reg;
 
-	switch (intval) {
-	case 100000:
-		reg = 0;
-		break;
-	case 500000:
-		reg = 1;
-		break;
-	case 900000:
-		reg = 2;
-		break;
-	case 1500000:
-		reg = 3;
-		break;
-	case 2000000:
-		reg = 4;
-		break;
-	case 2500000:
-		reg = 5;
-		break;
-	case 3000000:
-		reg = 6;
-		break;
-	case 3500000:
-		reg = 7;
-		break;
-	case 4000000:
-		reg = 8;
-		break;
-	default:
+	if (intval < 100000)
 		return -EINVAL;
-	}
+
+	for (reg = ARRAY_SIZE(axp813_input_current_limits_table) - 1; reg > 0; reg--)
+		if (intval >= axp813_input_current_limits_table[reg])
+			break;
 
 	return regmap_update_bits(power->regmap,
 				  AXP813_CHRG_CTRL3,
