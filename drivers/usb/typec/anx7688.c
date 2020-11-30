@@ -131,6 +131,7 @@
 #define ANX7688_OCM_MSG_PD_STATUS_REQ   0x17
 #define ANX7688_OCM_MSG_DP_ALT_ENTER    0x19
 #define ANX7688_OCM_MSG_DP_ALT_EXIT     0x1a
+#define ANX7688_OCM_MSG_GET_SNK_CAP     0x1b
 #define ANX7688_OCM_MSG_RESPONSE_TO_REQ 0xf0
 #define ANX7688_OCM_MSG_SOFT_RST        0xf1
 #define ANX7688_OCM_MSG_HARD_RST        0xf2
@@ -452,7 +453,6 @@ fw_loaded:
 	if (ret)
 		goto err_vconoff;
 
-
         /* time to turn off vbus after cc disconnect (unit is 4 ms) */
         ret = anx7688_reg_write(anx7688, ANX7688_REG_VBUS_OFF_DELAY_TIME, 100 / 4);
 	if (ret)
@@ -465,12 +465,10 @@ fw_loaded:
 	if (ret)
 		goto err_vconoff;
 
-
         /* maximum voltage in 100 mV units */
         ret = anx7688_reg_write(anx7688, ANX7688_REG_MAX_VOLTAGE, 50); /* 5 V */
 	if (ret)
 		goto err_vconoff;
-
 
         /* min/max power in 500 mW units */
         ret = anx7688_reg_write(anx7688, ANX7688_REG_MAX_POWER, 15 * 2); /* 15 W */
@@ -668,6 +666,18 @@ static int anx7688_handle_pd_message_response(struct anx7688* anx7688,
 			dev_info(anx7688->dev, "received response to PWR_OBJ_REQ (%s)\n", status);
 			break;
 
+		case ANX7688_OCM_MSG_VDM:
+			dev_info(anx7688->dev, "received response to VDM (%s)\n", status);
+			break;
+
+		case ANX7688_OCM_MSG_GOTO_MIN_REQ:
+			dev_info(anx7688->dev, "received response to GOTO_MIN_REQ (%s)\n", status);
+			break;
+
+		case ANX7688_OCM_MSG_GET_SNK_CAP:
+			dev_info(anx7688->dev, "received response to GET_SNK_CAP (%s)\n", status);
+			break;
+
 		default:
 			dev_info(anx7688->dev, "received response to unknown request (%s)\n", status);
 			break;
@@ -702,8 +712,20 @@ static int anx7688_handle_pd_message(struct anx7688* anx7688,
 				unsigned max_curr = pdo_max_current(pdo);
 
 				dev_info(anx7688->dev, "SRC_CAP PDO_FIXED (%umV %umA)\n", voltage, max_curr);
+			} else if (pdo_type(pdo) == PDO_TYPE_BATT) {
+				unsigned min_volt = pdo_min_voltage(pdo);
+				unsigned max_volt = pdo_max_voltage(pdo);
+				unsigned max_pow = pdo_max_power(pdo);
+
+				dev_info(anx7688->dev, "SRC_CAP PDO_BATT (%umV-%umV %umW)\n", min_volt, max_volt, max_pow);
+			} else if (pdo_type(pdo) == PDO_TYPE_VAR) {
+				unsigned min_volt = pdo_min_voltage(pdo);
+				unsigned max_volt = pdo_max_voltage(pdo);
+				unsigned max_curr = pdo_max_current(pdo);
+
+				dev_info(anx7688->dev, "SRC_CAP PDO_VAR (%umV-%umV %umA)\n", min_volt, max_volt, max_curr);
 			} else {
-				dev_info(anx7688->dev, "SNK_CAP PDO_OTHER (0x%08X)\n", pdo);
+				dev_info(anx7688->dev, "SRC_CAP PDO_APDO (0x%08X)\n", pdo);
 			}
 		}
 
@@ -733,8 +755,20 @@ static int anx7688_handle_pd_message(struct anx7688* anx7688,
 				unsigned max_curr = pdo_max_current(pdo);
 
 				dev_info(anx7688->dev, "SNK_CAP PDO_FIXED (%umV %umA)\n", voltage, max_curr);
+			} else if (pdo_type(pdo) == PDO_TYPE_BATT) {
+				unsigned min_volt = pdo_min_voltage(pdo);
+				unsigned max_volt = pdo_max_voltage(pdo);
+				unsigned max_pow = pdo_max_power(pdo);
+
+				dev_info(anx7688->dev, "SNK_CAP PDO_BATT (%umV-%umV %umW)\n", min_volt, max_volt, max_pow);
+			} else if (pdo_type(pdo) == PDO_TYPE_VAR) {
+				unsigned min_volt = pdo_min_voltage(pdo);
+				unsigned max_volt = pdo_max_voltage(pdo);
+				unsigned max_curr = pdo_max_current(pdo);
+
+				dev_info(anx7688->dev, "SNK_CAP PDO_VAR (%umV-%umV %umA)\n", min_volt, max_volt, max_curr);
 			} else {
-				dev_info(anx7688->dev, "SNK_CAP PDO_OTHER (0x%08X)\n", pdo);
+				dev_info(anx7688->dev, "SNK_CAP PDO_APDO (0x%08X)\n", pdo);
 			}
 		}
 
@@ -839,11 +873,26 @@ static int anx7688_handle_pd_message(struct anx7688* anx7688,
 		dev_info(anx7688->dev, "received SVID\n");
 		break;
 
-	case ANX7688_OCM_MSG_GET_DP_SNK_CAP:
-	case ANX7688_OCM_MSG_GOTO_MIN_REQ:
 	case ANX7688_OCM_MSG_VDM:
-	case ANX7688_OCM_MSG_DP_SNK_CFG:
+		dev_info(anx7688->dev, "received VDM\n");
+		break;
+
+	case ANX7688_OCM_MSG_GOTO_MIN_REQ:
+		dev_info(anx7688->dev, "received GOTO_MIN_REQ\n");
+		break;
+
 	case ANX7688_OCM_MSG_PD_STATUS_REQ:
+		dev_info(anx7688->dev, "received PD_STATUS_REQ\n");
+		break;
+
+	case ANX7688_OCM_MSG_GET_DP_SNK_CAP:
+		dev_info(anx7688->dev, "received GET_DP_SNK_CAP\n");
+		break;
+
+	case ANX7688_OCM_MSG_DP_SNK_CFG:
+		dev_info(anx7688->dev, "received DP_SNK_CFG\n");
+		break;
+
 	default:
 		dev_info(anx7688->dev, "received unknown message 0x%02x\n", cmd);
 		break;
