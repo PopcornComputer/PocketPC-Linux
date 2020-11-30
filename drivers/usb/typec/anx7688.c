@@ -537,6 +537,7 @@ err_vconoff:
 	anx7688->vconn_on = false;
 err_poweroff:
         anx7688_power_disable(anx7688);
+        dev_err(anx7688->dev, "OCM configuration failed\n");
         return ret;
 #endif
 }
