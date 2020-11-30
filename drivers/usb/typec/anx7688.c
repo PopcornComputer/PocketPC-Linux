@@ -1753,17 +1753,23 @@ static int anx7688_i2c_probe(struct i2c_client *client,
         mutex_init(&anx7688->lock);
         INIT_DELAYED_WORK(&anx7688->work, anx7688_work);
 
-	anx7688->n_src_caps = 1;
-	anx7688->src_caps[0] = PDO_FIXED(5000, 500,
-					 PDO_FIXED_DATA_SWAP |
-					 PDO_FIXED_USB_COMM |
-					 PDO_FIXED_DUAL_ROLE);
+	ret = of_property_read_variable_u32_array(dev->of_node, "source-caps",
+						  anx7688->src_caps,
+						  1, ARRAY_SIZE(anx7688->src_caps));
+	if (ret < 0) {
+		dev_err(dev, "failed to get source-caps from DT\n");
+		return ret;
+	}
+	anx7688->n_src_caps = ret;
 
-	anx7688->n_snk_caps = 1;
-	anx7688->snk_caps[0] = PDO_FIXED(5000, 3000,
-					 PDO_FIXED_DATA_SWAP |
-					 PDO_FIXED_USB_COMM |
-					 PDO_FIXED_DUAL_ROLE);
+	ret = of_property_read_variable_u32_array(dev->of_node, "sink-caps",
+						  anx7688->snk_caps,
+						  1, ARRAY_SIZE(anx7688->snk_caps));
+	if (ret < 0) {
+		dev_err(dev, "failed to get sink-caps from DT\n");
+		return ret;
+	}
+	anx7688->n_snk_caps = ret;
 
         for (i = 0; i < ANX7688_NUM_SUPPLIES; i++)
                 anx7688->supplies[i].supply = anx7688_supply_names[i];
