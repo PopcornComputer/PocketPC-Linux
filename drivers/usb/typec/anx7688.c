@@ -600,8 +600,6 @@ static void anx7688_handle_cable_change(struct anx7688* anx7688)
         int cabledet;
 	bool connected;
 
-        mutex_lock(&anx7688->lock);
-
 	connected = test_bit(ANX7688_F_CONNECTED, anx7688->flags);
         cabledet = gpiod_get_value(anx7688->gpio_cabledet);
 
@@ -609,8 +607,6 @@ static void anx7688_handle_cable_change(struct anx7688* anx7688)
                 anx7688_connect(anx7688);
         else if (!cabledet && connected)
                 anx7688_disconnect(anx7688);
-
-        mutex_unlock(&anx7688->lock);
 }
 
 static irqreturn_t anx7688_irq_plug_handler(int irq, void *data)
@@ -1765,6 +1761,8 @@ static void anx7688_work(struct work_struct *work)
 	if (test_bit(ANX7688_F_FW_FAILED, anx7688->flags))
 		return;
 
+	mutex_lock(&anx7688->lock);
+
 	if (test_and_clear_bit(ANX7688_F_PWRSUPPLY_CHANGE, anx7688->flags))
 		anx7688_handle_vbus_in_notify(anx7688);
 
@@ -1775,10 +1773,10 @@ static void anx7688_work(struct work_struct *work)
 		 * We check status periodically outside of interrupt, just to
 		 * be sure we didn't miss any status interrupts
 		 */
-		mutex_lock(&anx7688->lock);
 		anx7688_update_status(anx7688);
-		mutex_unlock(&anx7688->lock);
 	}
+
+	mutex_unlock(&anx7688->lock);
 }
 
 static int anx7688_i2c_probe(struct i2c_client *client,
