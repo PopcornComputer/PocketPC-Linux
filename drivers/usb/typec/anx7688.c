@@ -879,7 +879,24 @@ static int anx7688_handle_pd_message(struct anx7688* anx7688,
 		break;
 
 	case ANX7688_OCM_MSG_HARD_RST:
-		dev_info(anx7688->dev, "received HARD_RST\n");
+		if (anx7688->pd_capable) {
+			dev_info(anx7688->dev, "received HARD_RST\n");
+
+			// stop drawing power from VBUS
+			psy_val.intval = 0;
+			dev_dbg(dev, "disabling vbus_in power path\n");
+			ret = power_supply_set_property(anx7688->vbus_in_supply,
+							POWER_SUPPLY_PROP_ONLINE,
+							&psy_val);
+			if (ret)
+				dev_err(anx7688->dev, "failed to offline vbus_in\n");
+
+			// wait till the dust settles
+			mod_timer(&anx7688->nopd_timer, jiffies + msecs_to_jiffies(3000));
+		} else {
+			dev_dbg(anx7688->dev, "received HARD_RST, idiot firmware is bored\n");
+		}
+
 		break;
 
 	case ANX7688_OCM_MSG_RESTART:
