@@ -331,8 +331,8 @@ static int anx7688_send_ocm_message(struct anx7688 *anx7688, int cmd,
                 dev_err(anx7688->dev,
                         "failed to send pd packet (err=%d)\n", ret);
 
-        // wait until the message is processed (10ms max)
-        for (i = 0; i < 100; i++) {
+        // wait until the message is processed (30ms max)
+        for (i = 0; i < 300; i++) {
                 ret = anx7688_tcpc_reg_read(anx7688, ANX7688_TCPC_REG_INTERFACE_SEND);
                 if (ret <= 0)
                         return ret;
