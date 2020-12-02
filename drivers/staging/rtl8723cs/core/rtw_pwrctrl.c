@@ -2468,20 +2468,23 @@ static void resume_workitem_callback(struct work_struct *work)
 	struct pwrctrl_priv *pwrpriv = container_of(work, struct pwrctrl_priv, resume_work);
 	struct dvobj_priv *dvobj = pwrctl_to_dvobj(pwrpriv);
 	_adapter *adapter = dvobj_get_primary_adapter(dvobj);
+        PSDIO_DATA psdio = &dvobj->intf_data;
 
 	RTW_INFO("%s\n", __FUNCTION__);
 
 	rtw_resume_process(adapter);
 
-	rtw_resume_unlock_suspend();
+	pm_relax(&psdio->func->dev);
 }
 
 void rtw_resume_in_workqueue(struct pwrctrl_priv *pwrpriv)
 {
 	/* accquire system's suspend lock preventing from falliing asleep while resume in workqueue */
 	/* rtw_lock_suspend(); */
+	struct dvobj_priv *dvobj = pwrctl_to_dvobj(pwrpriv);
+        PSDIO_DATA psdio = &dvobj->intf_data;
 
-	rtw_resume_lock_suspend();
+	pm_stay_awake(&psdio->func->dev);
 
 #if 1
 	queue_work(pwrpriv->rtw_workqueue, &pwrpriv->resume_work);
