@@ -1133,6 +1133,9 @@ static irqreturn_t mpwr_gpio_isr(int irq, void *dev_id)
 	if (irq == mpwr->wakeup_irq) {
 		dev_dbg(mpwr->dev, "wakeup irq\n");
 
+		if (device_can_wakeup(mpwr->dev))
+			pm_wakeup_event(mpwr->dev, 2000);
+
 		set_bit(MPWR_F_GOT_WAKEUP, mpwr->flags);
 		spin_lock(&mpwr->lock);
 		mpwr->last_wakeup = ktime_get();
