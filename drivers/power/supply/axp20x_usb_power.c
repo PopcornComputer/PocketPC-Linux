@@ -625,6 +625,18 @@ static int axp20x_usb_power_probe(struct platform_device *pdev)
 			return ret;
 	}
 
+	/*TODO: Re-work this into a supply property with OF based default value */
+	if (of_machine_is_compatible("pine64,pinephone-1.2") > 0 ||
+		of_machine_is_compatible("pine64,pinephone-1.1") > 0 ||
+		of_machine_is_compatible("pine64,pinephone-1.0") > 0) {
+
+		dev_info(&pdev->dev, "Increasing Vbus hold voltage to 4.5V\n");
+
+		ret = regmap_update_bits(axp20x->regmap, 0x30, 0x7 << 3, 0x5 << 3);
+		if (ret)
+			return ret;
+	}
+
 	psy_cfg.of_node = pdev->dev.of_node;
 	psy_cfg.drv_data = power;
 
