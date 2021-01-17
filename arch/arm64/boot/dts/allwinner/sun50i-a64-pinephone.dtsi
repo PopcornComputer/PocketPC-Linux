@@ -572,6 +572,8 @@
 
 	rtl8723cs: wifi@1 {
 		reg = <1>;
+		interrupt-parent = <&r_pio>;
+		interrupts = <0 3 IRQ_TYPE_EDGE_FALLING>; /* PL3 */
 	};
 };
 
