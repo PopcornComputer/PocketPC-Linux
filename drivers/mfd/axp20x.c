@@ -806,6 +806,9 @@ static const struct mfd_cell axp813_cells[] = {
 		.num_resources	= ARRAY_SIZE(axp803_usb_power_supply_resources),
 		.resources	= axp803_usb_power_supply_resources,
 		.of_compatible	= "x-powers,axp813-usb-power-supply",
+	}, {
+		.name		= "axp20x-charger-led",
+		.of_compatible	= "x-powers,axp813-charger-led",
 	},
 };
 
