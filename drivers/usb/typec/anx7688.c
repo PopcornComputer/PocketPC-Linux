@@ -1264,7 +1264,7 @@ static int anx7688_eeprom_wait_done(struct anx7688 *anx7688)
         int ret;
 
         // wait for read to be done
-        timeout = ktime_add_us(ktime_get(), 10000);
+        timeout = ktime_add_us(ktime_get(), 50000);
         while (true) {
                 ret = anx7688_reg_read(anx7688, 0xe2);
                 if (ret < 0)
@@ -1361,6 +1361,8 @@ static int anx7688_eeprom_write(struct anx7688 *anx7688, unsigned addr,
         if (ret)
                 return ret;
 
+	udelay(2500);
+
         return 0;
 }
 
@@ -1412,6 +1414,9 @@ static int anx7688_flash_firmware(struct anx7688 *anx7688)
 
         msleep(10);
 
+	/*
+	 * Write to some magic registers to unlock flashing the EEPROM.
+	 */
         ret = anx7688_reg_update_bits(anx7688, 0x3f, BIT(5), BIT(5));
         if (ret < 0)
                 goto err_unlock;
@@ -1424,6 +1429,12 @@ static int anx7688_flash_firmware(struct anx7688 *anx7688)
 
         ret = anx7688_reg_update_bits(anx7688, 0x66, BIT(3), BIT(3));
         if (ret < 0)
+                goto err_unlock;
+
+        msleep(50);
+
+        ret = anx7688_eeprom_wait_done(anx7688);
+        if (ret)
                 goto err_unlock;
 
         for (addr = 0; addr < fw->size; addr += sizeof buf) {
