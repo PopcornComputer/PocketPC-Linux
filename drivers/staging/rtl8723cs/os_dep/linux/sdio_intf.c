@@ -269,9 +269,8 @@ static u8 gpio_hostwakeup_alloc_irq(PADAPTER padapter)
 	} else
 		RTW_INFO("allocate gpio irq %d ok\n", oob_irq);
 
-#ifndef CONFIG_PLATFORM_ARM_SUN8I
 	enable_irq_wake(oob_irq);
-#endif
+
 	return _SUCCESS;
 }
 
@@ -282,9 +281,8 @@ static void gpio_hostwakeup_free_irq(PADAPTER padapter)
 	if (oob_irq == 0)
 		return;
 
-#ifndef CONFIG_PLATFORM_ARM_SUN8I
 	disable_irq_wake(oob_irq);
-#endif
+
 	free_irq(oob_irq, padapter);
 }
 #endif
