@@ -1361,7 +1361,8 @@ static int anx7688_eeprom_write(struct anx7688 *anx7688, unsigned addr,
         if (ret)
                 return ret;
 
-	udelay(2500);
+	udelay(1500);
+	udelay(1000);
 
         return 0;
 }
