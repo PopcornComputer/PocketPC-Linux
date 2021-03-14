@@ -54,6 +54,7 @@
 			clocks = <&ccu CLK_CPUX>;
 			clock-names = "cpu";
 			#cooling-cells = <2>;
+			cpu-idle-states = <&cpu_sleep>, <&cluster_sleep>;
 		};
 
 		cpu1: cpu@1 {
@@ -65,6 +66,7 @@
 			clocks = <&ccu CLK_CPUX>;
 			clock-names = "cpu";
 			#cooling-cells = <2>;
+			cpu-idle-states = <&cpu_sleep>, <&cluster_sleep>;
 		};
 
 		cpu2: cpu@2 {
@@ -76,6 +78,7 @@
 			clocks = <&ccu CLK_CPUX>;
 			clock-names = "cpu";
 			#cooling-cells = <2>;
+			cpu-idle-states = <&cpu_sleep>, <&cluster_sleep>;
 		};
 
 		cpu3: cpu@3 {
@@ -87,6 +90,29 @@
 			clocks = <&ccu CLK_CPUX>;
 			clock-names = "cpu";
 			#cooling-cells = <2>;
+			cpu-idle-states = <&cpu_sleep>, <&cluster_sleep>;
+		};
+
+		idle-states {
+			entry-method = "psci";
+
+			cpu_sleep: cpu-sleep {
+				compatible = "arm,idle-state";
+				local-timer-stop;
+				entry-latency-us = <800>;
+				exit-latency-us = <1500>;
+				min-residency-us = <25000>;
+				arm,psci-suspend-param = <0x00010003>;
+			};
+
+			cluster_sleep: cluster-sleep {
+				compatible = "arm,idle-state";
+				local-timer-stop;
+				entry-latency-us = <850>;
+				exit-latency-us = <1500>;
+				min-residency-us = <50000>;
+				arm,psci-suspend-param = <0x01010013>;
+			};
 		};
 
 		L2: l2-cache {
