@@ -617,6 +617,8 @@ static const struct axp_irq_data axp813_irqs[] = {
 	{ "BATT_HEALTH_GOOD",		axp20x_battery_changed_irq },
 	{ "BATT_CHARGING",		axp20x_battery_changed_irq },
 	{ "BATT_CHARGING_DONE",		axp20x_battery_changed_irq },
+	{ "BATT_LOW_PWR_LVL1",		axp20x_battery_changed_irq },
+	{ "BATT_LOW_PWR_LVL2",		axp20x_battery_changed_irq },
 	{ "BATT_CHG_TEMP_HIGH",		axp20x_battery_temp_hot_irq },
 	{ "BATT_CHG_TEMP_HIGH_END",	axp20x_battery_temp_normal_irq },
 	{ "BATT_CHG_TEMP_LOW",		axp20x_battery_temp_cold_irq },
