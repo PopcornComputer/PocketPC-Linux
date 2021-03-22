@@ -219,7 +219,7 @@
 
 &uart3 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&uart3_pins>;
+	pinctrl-0 = <&uart3_lora_pins>;
 	status = "okay";
 };
 
@@ -233,4 +233,11 @@
 
 &i2c2 {
 	status = "okay";
+};
+
+&pio {
+	uart3_lora_pins: uart3-lora-pins {
+		pins = "PH4", "PH5";
+		function = "uart3";
+	};
 };
