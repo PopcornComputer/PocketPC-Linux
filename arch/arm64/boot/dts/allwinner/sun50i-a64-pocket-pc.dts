@@ -168,6 +168,18 @@
 	regulator-name = "vcc-3v1";
 };
 
+&reg_eldo2 {
+	regulator-always-on;
+	regulator-min-microvolt = <1800000>;
+	regulator-max-microvolt = <1800000>;
+};
+
+&reg_eldo3 {
+	regulator-always-on;
+	regulator-min-microvolt = <1800000>;
+	regulator-max-microvolt = <1800000>;
+};
+
 &reg_rtc_ldo {
 	regulator-name = "vcc-rtc";
 };
