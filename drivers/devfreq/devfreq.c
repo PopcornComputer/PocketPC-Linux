@@ -835,24 +835,28 @@ struct devfreq *devfreq_add_device(struct device *dev,
 		mutex_lock(&devfreq->lock);
 	}
 
-	devfreq->scaling_min_freq = find_available_min_freq(devfreq);
-	if (!devfreq->scaling_min_freq) {
-		mutex_unlock(&devfreq->lock);
-		err = -EINVAL;
-		goto err_dev;
-	}
-
-	devfreq->scaling_max_freq = find_available_max_freq(devfreq);
-	if (!devfreq->scaling_max_freq) {
-		mutex_unlock(&devfreq->lock);
-		err = -EINVAL;
-		goto err_dev;
-	}
-
-	devfreq->suspend_freq = dev_pm_opp_get_suspend_opp_freq(dev);
 	devfreq->opp_table = dev_pm_opp_get_opp_table(dev);
-	if (IS_ERR(devfreq->opp_table))
+	if (IS_ERR(devfreq->opp_table)) {
 		devfreq->opp_table = NULL;
+		devfreq->scaling_min_freq = 0;
+		devfreq->scaling_max_freq = ULONG_MAX;
+	} else {
+		devfreq->scaling_min_freq = find_available_min_freq(devfreq);
+		if (!devfreq->scaling_min_freq) {
+			mutex_unlock(&devfreq->lock);
+			err = -EINVAL;
+			goto err_dev;
+		}
+
+		devfreq->scaling_max_freq = find_available_max_freq(devfreq);
+		if (!devfreq->scaling_max_freq) {
+			mutex_unlock(&devfreq->lock);
+			err = -EINVAL;
+			goto err_dev;
+		}
+
+		devfreq->suspend_freq = dev_pm_opp_get_suspend_opp_freq(dev);
+	}
 
 	atomic_set(&devfreq->suspend_count, 0);
 
