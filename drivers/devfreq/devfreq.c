@@ -1985,6 +1985,31 @@ subsys_initcall(devfreq_init);
  */
 
 /**
+ * devfreq_recommended_freq() - Helper function to get the proper frequency from
+ *			        freq_table for the value given to target callback.
+ * @devfreq:	The devfreq device.
+ * @freq:	The frequency given to target function.
+ * @flags:	Flags handed from devfreq framework.
+ */
+void devfreq_recommended_freq(struct devfreq *devfreq,
+			      unsigned long *freq, u32 flags)
+{
+	const unsigned long *min = devfreq->profile->freq_table;
+	const unsigned long *max = min + devfreq->profile->max_state - 1;
+	const unsigned long *f;
+
+	if (flags & DEVFREQ_FLAG_LEAST_UPPER_BOUND) {
+		/* Find the first item lower than freq, or else min. */
+		for (f = max; f > min && *f > *freq; --f);
+	} else {
+		/* Find the first item higher than freq, or else max. */
+		for (f = min; f < max && *f < *freq; ++f);
+	}
+	*freq = *f;
+}
+EXPORT_SYMBOL(devfreq_recommended_freq);
+
+/**
  * devfreq_recommended_opp() - Helper function to get proper OPP for the
  *			     freq value given to target callback.
  * @dev:	The devfreq user device. (parent of devfreq)
