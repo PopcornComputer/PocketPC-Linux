@@ -130,16 +130,10 @@ static void get_freq_range(struct devfreq *devfreq,
 
 	/*
 	 * Initialize minimum/maximum frequency from freq table.
-	 * The devfreq drivers can initialize this in either ascending or
-	 * descending order and devfreq core supports both.
+	 * The devfreq drivers should initialize this in ascending order.
 	 */
-	if (freq_table[0] < freq_table[devfreq->profile->max_state - 1]) {
-		*min_freq = freq_table[0];
-		*max_freq = freq_table[devfreq->profile->max_state - 1];
-	} else {
-		*min_freq = freq_table[devfreq->profile->max_state - 1];
-		*max_freq = freq_table[0];
-	}
+	*min_freq = freq_table[0];
+	*max_freq = freq_table[devfreq->profile->max_state - 1];
 
 	/* Apply constraints from PM QoS */
 	qos_min_freq = dev_pm_qos_read_value(devfreq->dev.parent,
