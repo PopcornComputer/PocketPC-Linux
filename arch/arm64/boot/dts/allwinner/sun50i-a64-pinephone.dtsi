@@ -482,6 +482,7 @@
 		VDDIO-supply = <&reg_ldo_io0>;
 		touchscreen-size-x = <720>;
 		touchscreen-size-y = <1440>;
+		poweroff-in-suspend;
 	};
 };
 
