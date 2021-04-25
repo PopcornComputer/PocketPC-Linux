@@ -105,6 +105,7 @@ struct goodix_ts_data {
 	int bak_ref_len;
 	u8 *bak_ref;
         struct dentry *debug_root;
+        bool poweroff_in_suspend;
 };
 
 int goodix_i2c_read(struct i2c_client *client, u16 reg, u8 *buf, int len);
