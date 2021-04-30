@@ -1441,8 +1441,6 @@ static int goodix_suspend(struct device *dev)
 		goodix_free_irq(ts);
 		goodix_irq_direction_output(ts, 0);
 		gpiod_direction_output(ts->gpiod_rst, 0);
-		regulator_disable(ts->avdd28);
-		regulator_disable(ts->vddio);
 		return 0;
 	}
 
@@ -1492,18 +1490,6 @@ static int goodix_resume(struct device *dev)
 	int error;
 
 	if (ts->poweroff_in_suspend) {
-		error = regulator_enable(ts->avdd28);
-		if (error) {
-			dev_err(dev, "Regulator avdd28 enable failed.\n");
-			return error;
-		}
-
-		error = regulator_enable(ts->vddio);
-		if (error) {
-			dev_err(dev, "Regulator vddio enable failed.\n");
-			return error;
-		}
-
 		error = goodix_reset(ts);
 		if (error) {
 			dev_err(dev, "Controller reset failed.\n");
