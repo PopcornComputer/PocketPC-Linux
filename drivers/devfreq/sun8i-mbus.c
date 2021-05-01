@@ -10,6 +10,7 @@
 #include <linux/of.h>
 #include <linux/platform_device.h>
 #include <linux/property.h>
+#include <linux/pm_qos.h>
 
 #define MBUS_CR				0x0000
 #define MBUS_CR_GET_DRAM_TYPE(x)	(((x) >> 16) & 0x7)
@@ -436,6 +437,10 @@ static int sun8i_mbus_probe(struct platform_device *pdev)
 		err = "failed to add devfreq device\n";
 		goto err_unlock_dram;
 	}
+
+	if (max_state > 0)
+		dev_pm_qos_update_request(&priv->devfreq_dram->user_min_freq_req,
+					  priv->freq_table[1] / 1000);
 
 	priv->devfreq_dram->suspend_freq = priv->freq_table[0];
 
