@@ -2134,20 +2134,16 @@ static const struct i2c_device_id anx7688_ids[] = {
 };
 MODULE_DEVICE_TABLE(i2c, anx7688_ids);
 
-#ifdef CONFIG_OF
 static struct of_device_id anx7688_of_match_table[] = {
         { .compatible = "analogix,anx7688" },
         { },
 };
 MODULE_DEVICE_TABLE(of, anx7688_of_match_table);
-#endif
 
 static struct i2c_driver anx7688_driver = {
         .driver = {
                 .name = "anx7688",
-#ifdef CONFIG_OF
                 .of_match_table = anx7688_of_match_table,
-#endif
         },
         .probe = anx7688_i2c_probe,
         .remove = anx7688_i2c_remove,
