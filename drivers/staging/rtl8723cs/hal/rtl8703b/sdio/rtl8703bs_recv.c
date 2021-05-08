@@ -142,40 +142,40 @@ s32 rtl8703bs_recv_hdl(_adapter *padapter)
 
 #ifdef CONFIG_RTW_NAPI
 #ifdef CONFIG_RTW_NAPI_V2
-		if (padapter->registrypriv.en_napi) {
-			struct dvobj_priv *d;
-			struct _ADAPTER *a;
-			u8 i;
+	if (padapter->registrypriv.en_napi) {
+		struct dvobj_priv *d;
+		struct _ADAPTER *a;
+		u8 i;
+
+		d = adapter_to_dvobj(padapter);
+		for (i = 0; i < d->iface_nums; i++) {
+			a = d->padapters[i];
+			if (rtw_if_up(a) == _TRUE)
+				napi_schedule(&a->napi);
 	
-			d = adapter_to_dvobj(padapter);
-			for (i = 0; i < d->iface_nums; i++) {
-				a = d->padapters[i];
-				if (rtw_if_up(a) == _TRUE)
-					napi_schedule(&a->napi);
-		
-			}
 		}
+	}
 #endif /* CONFIG_RTW_NAPI_V2 */
 #endif /* CONFIG_RTW_NAPI */
-		
-		return _SUCCESS;
-	}
 	
-	static void rtl8703bs_recv_tasklet(void *priv)
-	{
-		_adapter *adapter = (_adapter *)priv;
-		s32 ret;
-	
-		ret = rtl8703bs_recv_hdl(adapter);
-		if (ret == RTW_RFRAME_UNAVAIL
-			|| ret == RTW_RFRAME_PKT_UNAVAIL
-		) {
-			/* schedule again and hope recvframe/packet is available next time. */
-		#ifdef PLATFORM_LINUX
-			tasklet_schedule(&adapter->recvpriv.recv_tasklet);
-		#endif
-		}
+	return _SUCCESS;
+}
+
+static void rtl8703bs_recv_tasklet(void *priv)
+{
+	_adapter *adapter = (_adapter *)priv;
+	s32 ret;
+
+	ret = rtl8703bs_recv_hdl(adapter);
+	if (ret == RTW_RFRAME_UNAVAIL
+		|| ret == RTW_RFRAME_PKT_UNAVAIL
+	) {
+		/* schedule again and hope recvframe/packet is available next time. */
+	#ifdef PLATFORM_LINUX
+		tasklet_schedule(&adapter->recvpriv.recv_tasklet);
+	#endif
 	}
+}
 #else
 static void rtl8703bs_recv_tasklet(void *priv)
 {
