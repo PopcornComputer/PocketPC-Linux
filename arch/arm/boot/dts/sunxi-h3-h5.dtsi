@@ -99,12 +99,6 @@
 		};
 	};
 
-	de: display-engine {
-		compatible = "allwinner,sun8i-h3-display-engine";
-		allwinner,pipelines = <&mixer0>;
-		status = "disabled";
-	};
-
 	sound_hdmi: sound_hdmi {
 		compatible = "allwinner,sun9i-a80-hdmi-audio",
 			     "allwinner,sun8i-h3-hdmi-audio";
@@ -117,6 +111,12 @@
 		cpu {
 			sound-dai = <&i2s2>;
 		};
+	};
+
+	de: display-engine {
+		compatible = "allwinner,sun8i-h3-display-engine";
+		allwinner,pipelines = <&mixer0>;
+		status = "disabled";
 	};
 
 	soc {
