@@ -118,6 +118,10 @@
 	status = "okay";
 };
 
+&i2s1 {
+	status = "okay";
+};
+
 &hdmi {
 	status = "okay";
 };
@@ -126,10 +130,6 @@
 	hdmi_out_con: endpoint {
 		remote-endpoint = <&hdmi_con_in>;
 	};
-};
-
-&i2s1 {
-	status = "okay";
 };
 
 &mmc0 {
