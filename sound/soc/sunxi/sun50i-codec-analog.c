@@ -116,6 +116,11 @@
 #define SUN50I_ADDA_HS_MBIAS_CTRL	0x0e
 #define SUN50I_ADDA_HS_MBIAS_CTRL_MMICBIASEN	7
 
+#define SUN50I_ADDA_MDET_CTRL		0x1c
+#define SUN50I_ADDA_MDET_CTRL_SELDETADC_FS	4
+#define SUN50I_ADDA_MDET_CTRL_SELDETADC_DB	2
+#define SUN50I_ADDA_MDET_CTRL_SELDETADC_BF	0
+
 #define SUN50I_ADDA_JACK_MIC_CTRL	0x1d
 #define SUN50I_ADDA_JACK_MIC_CTRL_JACKDETEN	7
 #define SUN50I_ADDA_JACK_MIC_CTRL_INNERRESEN	6
@@ -500,6 +505,13 @@ static int sun50i_a64_codec_probe(struct snd_soc_component *component)
 			   BIT(SUN50I_ADDA_JACK_MIC_CTRL_INNERRESEN),
 			   codec->internal_bias_resistor <<
 				SUN50I_ADDA_JACK_MIC_CTRL_INNERRESEN);
+
+	/* Select sample interval of the ADC sample to 32ms */
+	regmap_update_bits(component->regmap, SUN50I_ADDA_MDET_CTRL,
+			   0x7 << SUN50I_ADDA_MDET_CTRL_SELDETADC_FS |
+			   0x3 << SUN50I_ADDA_MDET_CTRL_SELDETADC_BF,
+			   0x3 << SUN50I_ADDA_MDET_CTRL_SELDETADC_FS |
+			   0x3 << SUN50I_ADDA_MDET_CTRL_SELDETADC_BF);
 
 	return 0;
 }
