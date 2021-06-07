@@ -436,6 +436,61 @@ static int pwm_backlight_initial_power_state(const struct pwm_bl_data *pb)
 	return FB_BLANK_UNBLANK;
 }
 
+static ssize_t lth_brightness_show(struct device *dev,
+				   struct device_attribute *attr, char *buf)
+{
+	struct backlight_device *bl = platform_get_drvdata(to_platform_device(dev));
+	struct pwm_bl_data *pb = bl ? bl_get_data(bl) : NULL;
+	struct pwm_state state;
+	unsigned val;
+
+	if (!pb)
+		return -EBUSY;
+
+	pwm_get_state(pb->pwm, &state);
+	val = div_u64(100 * pb->lth_brightness, state.period);
+
+	return scnprintf(buf, PAGE_SIZE, "%u\n", val);
+}
+
+static ssize_t lth_brightness_store(struct device *dev,
+				    struct device_attribute *attr,
+				    const char *buf, size_t len)
+{
+	struct backlight_device *bl = platform_get_drvdata(to_platform_device(dev));
+	struct pwm_bl_data *pb = bl ? bl_get_data(bl) : NULL;
+	struct pwm_state state;
+	unsigned val;
+	int ret;
+
+	if (!pb)
+		return -EBUSY;
+
+	ret = kstrtouint(buf, 10, &val);
+	if (ret)
+		return ret;
+
+        if (val > 100)
+		val = 100;
+
+	pwm_get_state(pb->pwm, &state);
+	pb->lth_brightness = div_u64(val * state.period, 100);
+	pwm_backlight_update_status(bl);
+
+	return len;
+}
+
+static DEVICE_ATTR_RW(lth_brightness);
+
+static struct attribute *pwm_bl_attrs[] = {
+	&dev_attr_lth_brightness.attr,
+	NULL,
+};
+
+static const struct attribute_group pwm_bl_group = {
+	.attrs = pwm_bl_attrs,
+};
+
 static int pwm_backlight_probe(struct platform_device *pdev)
 {
 	struct platform_pwm_backlight_data *data = dev_get_platdata(&pdev->dev);
@@ -445,6 +500,7 @@ static int pwm_backlight_probe(struct platform_device *pdev)
 	struct device_node *node = pdev->dev.of_node;
 	struct pwm_bl_data *pb;
 	struct pwm_state state, state_real;
+	u32 lth_brightness;
 	unsigned int i;
 	int ret;
 
@@ -598,8 +654,20 @@ static int pwm_backlight_probe(struct platform_device *pdev)
 		pb->scale = data->max_brightness;
 	}
 
-	pb->lth_brightness = data->lth_brightness * (div_u64(state.period,
-				pb->scale));
+	pb->lth_brightness = div_u64(data->lth_brightness * state.period, pb->scale);
+
+	ret = of_property_read_u32(pdev->dev.of_node, "lth-brightness",
+				   &lth_brightness);
+	if (ret == 0) {
+		if (lth_brightness > 100)
+			lth_brightness = 100;
+
+		pb->lth_brightness = div_u64(lth_brightness * state.period, 100);
+	}
+
+	ret = devm_device_add_group(&pdev->dev, &pwm_bl_group);
+	if (ret)
+		goto err_alloc;
 
 	props.type = BACKLIGHT_RAW;
 	props.max_brightness = data->max_brightness;
