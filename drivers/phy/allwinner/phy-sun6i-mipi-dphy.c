@@ -92,6 +92,8 @@ struct sun6i_dphy {
 
 	struct phy				*phy;
 	struct phy_configure_opts_mipi_dphy	config;
+	
+	bool hw_preconfigured;
 };
 
 static int sun6i_dphy_init(struct phy *phy)
@@ -123,6 +125,11 @@ static int sun6i_dphy_power_on(struct phy *phy)
 {
 	struct sun6i_dphy *dphy = phy_get_drvdata(phy);
 	u8 lanes_mask = GENMASK(dphy->config.lanes - 1, 0);
+
+	if (dphy->hw_preconfigured) {
+		dphy->hw_preconfigured = false;
+		return 0;
+	}
 
 	regmap_write(dphy->regs, SUN6I_DPHY_TX_CTL_REG,
 		     SUN6I_DPHY_TX_CTL_HS_TX_CLK_CONT);
@@ -254,10 +261,18 @@ static int sun6i_dphy_probe(struct platform_device *pdev)
 	struct phy_provider *phy_provider;
 	struct sun6i_dphy *dphy;
 	void __iomem *regs;
+	u32 fb_start;
+	int ret;
 
 	dphy = devm_kzalloc(&pdev->dev, sizeof(*dphy), GFP_KERNEL);
 	if (!dphy)
 		return -ENOMEM;
+
+	ret = of_property_read_u32_index(of_chosen, "p-boot,framebuffer-start", 0, &fb_start);
+	if (ret == 0) {
+		/* the display pipeline is already initialized by p-boot */
+		dphy->hw_preconfigured = true;
+	}
 
 	regs = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(regs)) {
