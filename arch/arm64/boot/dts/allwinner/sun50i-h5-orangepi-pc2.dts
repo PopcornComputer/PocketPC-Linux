@@ -149,6 +149,10 @@
 	};
 };
 
+&i2s2 {
+	status = "okay";
+};
+
 &ir {
 	pinctrl-names = "default";
 	pinctrl-0 = <&r_ir_rx_pin>;
@@ -192,6 +196,10 @@
 		regulator-boot-on;
 		regulator-always-on;
 	};
+};
+
+&sound_hdmi {
+	status = "okay";
 };
 
 &spi0  {
