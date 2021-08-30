@@ -69,6 +69,10 @@
 #define SUN6I_LOSC_OUT_GATING			0x0060
 #define SUN6I_LOSC_OUT_GATING_EN_OFFSET		0
 
+/* General-purpose data */
+#define SUN6I_GP_DATA				0x0100
+#define SUN6I_GP_DATA_SIZE			0x40
+
 /*
  * Get date values
  */
@@ -641,7 +645,39 @@ static const struct rtc_class_ops sun6i_rtc_ops = {
 	.alarm_irq_enable	= sun6i_rtc_alarm_irq_enable
 };
 
-#ifdef CONFIG_PM_SLEEP
+static int sun6i_rtc_nvmem_read(void *priv, unsigned int offset, void *_val, size_t bytes)
+{
+	struct sun6i_rtc_dev *chip = priv;
+	u32 *val = _val;
+	int i;
+
+	for (i = 0; i < bytes / 4; ++i)
+		val[i] = readl(chip->base + SUN6I_GP_DATA + offset + 4 * i);
+
+	return 0;
+}
+
+static int sun6i_rtc_nvmem_write(void *priv, unsigned int offset, void *_val, size_t bytes)
+{
+	struct sun6i_rtc_dev *chip = priv;
+	u32 *val = _val;
+	int i;
+
+	for (i = 0; i < bytes / 4; ++i)
+		writel(val[i], chip->base + SUN6I_GP_DATA + offset + 4 * i);
+
+	return 0;
+}
+
+static struct nvmem_config sun6i_rtc_nvmem_cfg = {
+	.type		= NVMEM_TYPE_BATTERY_BACKED,
+	.reg_read	= sun6i_rtc_nvmem_read,
+	.reg_write	= sun6i_rtc_nvmem_write,
+	.size		= SUN6I_GP_DATA_SIZE,
+	.word_size	= 4,
+	.stride		= 4,
+};
+
 /* Enable IRQ wake on suspend, to wake up from RTC. */
 static int sun6i_rtc_suspend(struct device *dev)
 {
@@ -654,7 +690,7 @@ static int sun6i_rtc_suspend(struct device *dev)
 }
 
 /* Disable IRQ wake on resume. */
-static int sun6i_rtc_resume(struct device *dev)
+static int __maybe_unused sun6i_rtc_resume(struct device *dev)
 {
 	struct sun6i_rtc_dev *chip = dev_get_drvdata(dev);
 
@@ -663,7 +699,6 @@ static int sun6i_rtc_resume(struct device *dev)
 
 	return 0;
 }
-#endif
 
 static SIMPLE_DEV_PM_OPS(sun6i_rtc_pm_ops,
 	sun6i_rtc_suspend, sun6i_rtc_resume);
@@ -730,9 +765,19 @@ static int sun6i_rtc_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
+	sun6i_rtc_nvmem_cfg.priv = chip;
+	ret = devm_rtc_nvmem_register(chip->rtc, &sun6i_rtc_nvmem_cfg);
+	if (ret)
+		return ret;
+
 	dev_info(&pdev->dev, "RTC enabled\n");
 
 	return 0;
+}
+
+static void sun6i_rtc_shutdown(struct platform_device *pdev)
+{
+	sun6i_rtc_suspend(&pdev->dev);
 }
 
 /*
@@ -755,6 +800,7 @@ MODULE_DEVICE_TABLE(of, sun6i_rtc_dt_ids);
 
 static struct platform_driver sun6i_rtc_driver = {
 	.probe		= sun6i_rtc_probe,
+	.shutdown	= sun6i_rtc_shutdown,
 	.driver		= {
 		.name		= "sun6i-rtc",
 		.of_match_table = sun6i_rtc_dt_ids,
