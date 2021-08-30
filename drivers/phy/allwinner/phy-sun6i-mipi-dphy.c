@@ -283,13 +283,15 @@ static int sun6i_dphy_probe(struct platform_device *pdev)
 	dphy->regs = devm_regmap_init_mmio_clk(&pdev->dev, "bus",
 					       regs, &sun6i_dphy_regmap_config);
 	if (IS_ERR(dphy->regs)) {
-		dev_err(&pdev->dev, "Couldn't create the DPHY encoder regmap\n");
+		dev_err_probe(&pdev->dev, PTR_ERR(dphy->regs),
+			      "Couldn't create the DPHY encoder regmap\n");
 		return PTR_ERR(dphy->regs);
 	}
 
 	dphy->reset = devm_reset_control_get_shared(&pdev->dev, NULL);
 	if (IS_ERR(dphy->reset)) {
-		dev_err(&pdev->dev, "Couldn't get our reset line\n");
+		dev_err_probe(&pdev->dev, PTR_ERR(dphy->reset),
+			      "Couldn't get our reset line\n");
 		return PTR_ERR(dphy->reset);
 	}
 

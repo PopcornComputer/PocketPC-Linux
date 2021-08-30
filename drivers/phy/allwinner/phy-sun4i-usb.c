@@ -738,14 +738,16 @@ static int sun4i_usb_phy_probe(struct platform_device *pdev)
 	data->id_det_gpio = devm_gpiod_get_optional(dev, "usb0_id_det",
 						    GPIOD_IN);
 	if (IS_ERR(data->id_det_gpio)) {
-		dev_err(dev, "Couldn't request ID GPIO\n");
+		dev_err_probe(dev, PTR_ERR(data->id_det_gpio),
+			      "Couldn't request ID GPIO\n");
 		return PTR_ERR(data->id_det_gpio);
 	}
 
 	data->vbus_det_gpio = devm_gpiod_get_optional(dev, "usb0_vbus_det",
 						      GPIOD_IN);
 	if (IS_ERR(data->vbus_det_gpio)) {
-		dev_err(dev, "Couldn't request VBUS detect GPIO\n");
+		dev_err_probe(dev, PTR_ERR(data->vbus_det_gpio),
+			      "Couldn't request VBUS detect GPIO\n");
 		return PTR_ERR(data->vbus_det_gpio);
 	}
 
@@ -753,7 +755,8 @@ static int sun4i_usb_phy_probe(struct platform_device *pdev)
 		data->vbus_power_supply = devm_power_supply_get_by_phandle(dev,
 						     "usb0_vbus_power-supply");
 		if (IS_ERR(data->vbus_power_supply)) {
-			dev_err(dev, "Couldn't get the VBUS power supply\n");
+			dev_err_probe(dev, PTR_ERR(data->vbus_power_supply),
+				      "Couldn't get the VBUS power supply\n");
 			return PTR_ERR(data->vbus_power_supply);
 		}
 
@@ -786,8 +789,8 @@ static int sun4i_usb_phy_probe(struct platform_device *pdev)
 		phy->vbus = devm_regulator_get_optional(dev, name);
 		if (IS_ERR(phy->vbus)) {
 			if (PTR_ERR(phy->vbus) == -EPROBE_DEFER) {
-				dev_err(dev,
-					"Couldn't get regulator %s... Deferring probe\n",
+				dev_err_probe(dev, PTR_ERR(phy->vbus),
+					"Couldn't get regulator %s\n",
 					name);
 				return -EPROBE_DEFER;
 			}
@@ -802,7 +805,8 @@ static int sun4i_usb_phy_probe(struct platform_device *pdev)
 
 		phy->clk = devm_clk_get(dev, name);
 		if (IS_ERR(phy->clk)) {
-			dev_err(dev, "failed to get clock %s\n", name);
+			dev_err_probe(dev, PTR_ERR(phy->clk),
+				      "failed to get clock %s\n", name);
 			return PTR_ERR(phy->clk);
 		}
 
