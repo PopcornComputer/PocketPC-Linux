@@ -93,6 +93,7 @@ struct h5 {
 	const struct h5_vnd *vnd;
 	const char *id;
 
+	struct gpio_desc *reset_gpio;
 	struct gpio_desc *enable_gpio;
 	struct gpio_desc *device_wake_gpio;
 };
@@ -821,6 +822,9 @@ static int h5_serdev_probe(struct serdev_device *serdev)
 			return -ENODEV;
 
 		h5->vnd = (const struct h5_vnd *)data;
+
+		of_property_read_string(dev->of_node,
+					"firmware-postfix", &h5->id);
 	}
 
 
@@ -832,6 +836,10 @@ static int h5_serdev_probe(struct serdev_device *serdev)
 						       GPIOD_OUT_LOW);
 	if (IS_ERR(h5->device_wake_gpio))
 		return PTR_ERR(h5->device_wake_gpio);
+
+	h5->reset_gpio = devm_gpiod_get_optional(dev, "reset", GPIOD_OUT_HIGH);
+	if (IS_ERR(h5->reset_gpio))
+		return PTR_ERR(h5->reset_gpio);
 
 	return hci_uart_register_device(&h5->serdev_hu, &h5p);
 }
@@ -923,6 +931,9 @@ static void h5_btrtl_open(struct h5 *h5)
 
 	/* The controller needs up to 500ms to wakeup */
 	gpiod_set_value_cansleep(h5->enable_gpio, 1);
+	/* Take it out of reset */
+	gpiod_set_value_cansleep(h5->reset_gpio, 0);
+	msleep(100);
 	gpiod_set_value_cansleep(h5->device_wake_gpio, 1);
 	msleep(500);
 }
@@ -930,6 +941,7 @@ static void h5_btrtl_open(struct h5 *h5)
 static void h5_btrtl_close(struct h5 *h5)
 {
 	gpiod_set_value_cansleep(h5->device_wake_gpio, 0);
+	gpiod_set_value_cansleep(h5->reset_gpio, 1);
 	gpiod_set_value_cansleep(h5->enable_gpio, 0);
 }
 
@@ -1001,6 +1013,12 @@ static struct h5_vnd rtl_vnd = {
 	.resume		= h5_btrtl_resume,
 	.acpi_gpio_map	= acpi_btrtl_gpios,
 };
+
+static struct h5_vnd rtl_vnd_nosuspend = {
+	.setup		= h5_btrtl_setup,
+	.open		= h5_btrtl_open,
+	.close		= h5_btrtl_close,
+};
 #endif
 
 #ifdef CONFIG_ACPI
@@ -1026,6 +1044,8 @@ static const struct of_device_id rtl_bluetooth_of_match[] = {
 	  .data = (const void *)&rtl_vnd },
 	{ .compatible = "realtek,rtl8723ds-bt",
 	  .data = (const void *)&rtl_vnd },
+	{ .compatible = "realtek,rtl8723cs-bt",
+	  .data = (const void *)&rtl_vnd_nosuspend },
 #endif
 	{ },
 };
