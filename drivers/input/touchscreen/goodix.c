@@ -27,6 +27,7 @@
 #include <linux/slab.h>
 #include <linux/acpi.h>
 #include <linux/of.h>
+#include <linux/debugfs.h>
 #include <asm/unaligned.h>
 
 #define GOODIX_GPIO_INT_NAME		"irq"
@@ -115,6 +116,8 @@ struct goodix_ts_data {
 	unsigned int contact_size;
 	u8 config[GOODIX_CONFIG_MAX_LENGTH];
 	unsigned short keymap[GOODIX_MAX_KEYS];
+        struct dentry *debug_root;
+        bool poweroff_in_suspend;
 };
 
 static int goodix_check_cfg_8(struct goodix_ts_data *ts,
@@ -919,6 +922,16 @@ retry_get_irq_gpio:
 	return 0;
 }
 
+static int ts_config_bin_show(struct seq_file *s, void *data)
+{
+        struct goodix_ts_data *ts = s->private;
+
+        seq_write(s, ts->config, ts->chip->config_len);
+
+        return 0;
+}
+DEFINE_SHOW_ATTRIBUTE(ts_config_bin);
+
 /**
  * goodix_read_config - Read the embedded configuration of the panel
  *
@@ -952,6 +965,10 @@ static void goodix_read_config(struct goodix_ts_data *ts)
 	}
 
 	ts->chip->calc_config_checksum(ts);
+
+        ts->debug_root = debugfs_create_dir("goodix", NULL);
+        debugfs_create_file("config.bin", 0444, ts->debug_root, ts,
+                            &ts_config_bin_fops);
 }
 
 /**
@@ -1155,6 +1172,7 @@ static void goodix_disable_regulators(void *arg)
 static int goodix_ts_probe(struct i2c_client *client,
 			   const struct i2c_device_id *id)
 {
+	struct device_node *np = client->dev.of_node;
 	struct goodix_ts_data *ts;
 	int error;
 
@@ -1173,6 +1191,7 @@ static int goodix_ts_probe(struct i2c_client *client,
 	i2c_set_clientdata(client, ts);
 	init_completion(&ts->firmware_loading_complete);
 	ts->contact_size = GOODIX_CONTACT_SIZE;
+	ts->poweroff_in_suspend = of_property_read_bool(np, "poweroff-in-suspend");
 
 	error = goodix_get_gpio_config(ts);
 	if (error)
@@ -1265,6 +1284,8 @@ static int goodix_ts_remove(struct i2c_client *client)
 	if (ts->load_cfg_from_disk)
 		wait_for_completion(&ts->firmware_loading_complete);
 
+        debugfs_remove(ts->debug_root);
+
 	return 0;
 }
 
@@ -1276,6 +1297,13 @@ static int __maybe_unused goodix_suspend(struct device *dev)
 
 	if (ts->load_cfg_from_disk)
 		wait_for_completion(&ts->firmware_loading_complete);
+
+	if (ts->poweroff_in_suspend) {
+		goodix_free_irq(ts);
+		goodix_irq_direction_output(ts, 0);
+		gpiod_direction_output(ts->gpiod_rst, 0);
+		return 0;
+	}
 
 	/* We need gpio pins to suspend/resume */
 	if (ts->irq_pin_access_method == IRQ_PIN_ACCESS_NONE) {
@@ -1319,6 +1347,20 @@ static int __maybe_unused goodix_resume(struct device *dev)
 	struct goodix_ts_data *ts = i2c_get_clientdata(client);
 	u8 config_ver;
 	int error;
+
+	if (ts->poweroff_in_suspend) {
+		error = goodix_reset(ts);
+		if (error) {
+			dev_err(dev, "Controller reset failed.\n");
+			return error;
+		}
+
+		error = goodix_request_irq(ts);
+		if (error)
+			return error;
+
+		return 0;
+	}
 
 	if (ts->irq_pin_access_method == IRQ_PIN_ACCESS_NONE) {
 		enable_irq(client->irq);
