@@ -913,6 +913,7 @@ config LEDS_IP30
 	  To compile this driver as a module, choose M here: the module
 	  will be called leds-ip30.
 
+
 config LEDS_SGM3140
 	tristate "LED support for the SGM3140"
 	depends on LEDS_CLASS_FLASH
@@ -927,6 +928,13 @@ config LEDS_ACER_A500
 	help
 	  This option enables support for the Power Button LED of
 	  Acer Iconia Tab A500.
+
+config LEDS_AXP20X
+	tristate "Charger LED support for AXP20X-like PMICs (AXP813, ...)"
+	depends on LEDS_CLASS && MFD_AXP20X
+	help
+	  This option enables support for on-chip LED driver on
+	  AXP20X-like PMICs.
 
 source "drivers/leds/blink/Kconfig"
 
