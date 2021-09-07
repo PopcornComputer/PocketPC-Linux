@@ -1413,6 +1413,7 @@ static const struct of_device_id edt_ft5x06_of_match[] = {
 	{ .compatible = "evervision,ev-ft5726", .data = &edt_ft5506_data },
 	/* Note focaltech vendor prefix for compatibility with ft6236.c */
 	{ .compatible = "focaltech,ft6236", .data = &edt_ft6236_data },
+	{ .compatible = "focaltech,ft8716-ts", .data = &edt_ft5x06_data },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(of, edt_ft5x06_of_match);
