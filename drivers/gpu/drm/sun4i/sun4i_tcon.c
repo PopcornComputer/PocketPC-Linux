@@ -389,8 +389,8 @@ static void sun4i_tcon0_mode_set_cpu(struct sun4i_tcon *tcon,
 	tcon->dclk_max_div = SUN6I_DSI_TCON_DIV;
 
 	/* Configure the dot clock */
-	clk_set_rate(tcon->dclk, mode->crtc_clock * 1000
-				 * bpp / (lanes * SUN6I_DSI_TCON_DIV));
+	clk_set_rate(tcon->dclk, mode->crtc_clock * bpp
+				 / (lanes * SUN6I_DSI_TCON_DIV) * 1000);
 
         /* Set the resolution */
 	regmap_write(tcon->regs, SUN4I_TCON0_BASIC0_REG,
