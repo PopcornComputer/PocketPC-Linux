@@ -36,6 +36,7 @@ struct ft8716 {
 	struct regulator_bulk_data supplies[ARRAY_SIZE(regulator_names)];
 	struct gpio_desc	*reset;
 	bool prepared;
+	enum drm_panel_orientation orientation;
 
 	const struct ft8716_panel_desc *desc;
 };
@@ -502,6 +503,7 @@ static int ft8716_get_modes(struct drm_panel *panel,
 	connector->display_info.width_mm = mode->width_mm;
 	connector->display_info.height_mm = mode->height_mm;
 	drm_mode_probed_add(connector, mode);
+	drm_connector_set_panel_orientation(connector, ctx->orientation);
 
 	return 1;
 }
@@ -523,6 +525,12 @@ static int ft8716_dsi_probe(struct mipi_dsi_device *dsi)
 	ctx = devm_kzalloc(dev, sizeof(*ctx), GFP_KERNEL);
 	if (!ctx)
 		return -ENOMEM;
+
+	ret = of_drm_get_panel_orientation(dev->of_node, &ctx->orientation);
+	if (ret < 0) {
+		dev_err(dev, "%pOF: failed to get orientation %d\n", dev->of_node, ret);
+		return ret;
+	}
 
 	mipi_dsi_set_drvdata(dsi, ctx);
 	ctx->dsi = dsi;
