@@ -134,6 +134,7 @@
 		reset-gpios = <&pio 6 11 GPIO_ACTIVE_HIGH>; /* LCD_RESET_N: PG11 */
 		backlight = <&lm3630a>;
 		reg = <0>;
+		rotation = <270>;
 	};
 };
 
