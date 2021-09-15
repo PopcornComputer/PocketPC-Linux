@@ -9,6 +9,7 @@
 #include "sun50i-a64-cpu-opp.dtsi"
 
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/leds/common.h>
 #include <dt-bindings/pwm/pwm.h>
 
 / {
@@ -41,6 +42,16 @@
 			hdmi_con_in: endpoint {
 				remote-endpoint = <&hdmi_out_con>;
 			};
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led-0 {
+			function = LED_FUNCTION_INDICATOR;
+			color = <LED_COLOR_ID_BLUE>;
+			gpios = <&pio 4 9 GPIO_ACTIVE_HIGH>; /* PE9 */
 		};
 	};
 
@@ -127,7 +138,7 @@
 	vcc-dsi-supply = <&reg_dldo1>;		/* VCC3V3-DSI */
 	status = "okay";
 
-	panel@0 {
+	panel: panel@0 {
 		compatible = "focaltech,8716";
 		avdd-supply = <&reg_vcc5v5_pos>;
 		avee-supply = <&reg_vcc5v5_neg>;
@@ -204,7 +215,6 @@
 		};
 	};
 
-	/* TODO: Touch controller */
 	ft8716_ts: touchscreen@38 {
 		compatible = "focaltech,ft8716-ts", "edt,edt-ft5406";
 		reg = <0x38>;
@@ -297,6 +307,10 @@
 	status = "okay";
 };
 
+&charger_led {
+	status = "okay";
+};
+
 &reg_aldo1 {
 	regulator-min-microvolt = <3300000>;
 	regulator-max-microvolt = <3300000>;
@@ -352,7 +366,6 @@
 };
 
 &reg_dldo2 {
-	regulator-always-on;
 	regulator-min-microvolt = <2500000>;
 	regulator-max-microvolt = <2500000>;
 	regulator-name = "vcc-2v5-edp";

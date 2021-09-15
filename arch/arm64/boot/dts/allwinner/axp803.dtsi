@@ -43,6 +43,12 @@
 		status = "disabled";
 	};
 
+	charger_led: charger-led {
+		compatible = "x-powers,axp803-charger-led",
+			     "x-powers,axp813-charger-led";
+		status = "disabled";
+	};
+
 	regulators {
 		/* Default work frequency for buck regulators */
 		x-powers,dcdc-freq = <3000>;
