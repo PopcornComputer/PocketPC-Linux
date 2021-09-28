@@ -489,7 +489,7 @@
 					tcon0_out_dsi: endpoint@1 {
 						reg = <1>;
 						remote-endpoint = <&dsi_in_tcon0>;
-						allwinner,tcon-channel = <1>;
+						allwinner,tcon-channel = <0>;
 					};
 				};
 			};

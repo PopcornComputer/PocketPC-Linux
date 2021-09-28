@@ -666,14 +666,17 @@ static bool anx6345_get_chip_id(struct anx6345 *anx6345)
 {
 	unsigned int i, idl, idh, version;
 
+	printk("reading idl\n");
 	if (regmap_read(anx6345->map[I2C_IDX_TXCOM], SP_DEVICE_IDL_REG, &idl))
 		return false;
 
+	printk("reading idh\n");
 	if (regmap_read(anx6345->map[I2C_IDX_TXCOM], SP_DEVICE_IDH_REG, &idh))
 		return false;
 
 	anx6345->chipid = (u8)idl | ((u8)idh << 8);
 
+	printk("reading ver\n");
 	if (regmap_read(anx6345->map[I2C_IDX_TXCOM], SP_DEVICE_VERSION_REG,
 			&version))
 		return false;
@@ -720,6 +723,7 @@ static int anx6345_i2c_probe(struct i2c_client *client,
 	if (err)
 		DRM_DEBUG("No panel found\n");
 
+	printk("to get dvdd12\n");
 	/* 1.2V digital core power regulator  */
 	anx6345->dvdd12 = devm_regulator_get(dev, "dvdd12");
 	if (IS_ERR(anx6345->dvdd12)) {
@@ -729,6 +733,7 @@ static int anx6345_i2c_probe(struct i2c_client *client,
 		return PTR_ERR(anx6345->dvdd12);
 	}
 
+	printk("to get dvdd25\n");
 	/* 2.5V digital core power regulator  */
 	anx6345->dvdd25 = devm_regulator_get(dev, "dvdd25");
 	if (IS_ERR(anx6345->dvdd25)) {
@@ -738,6 +743,7 @@ static int anx6345_i2c_probe(struct i2c_client *client,
 		return PTR_ERR(anx6345->dvdd25);
 	}
 
+	printk("to get reset\n");
 	/* GPIO for chip reset */
 	anx6345->gpiod_reset = devm_gpiod_get(dev, "reset", GPIOD_OUT_LOW);
 	if (IS_ERR(anx6345->gpiod_reset)) {
@@ -745,6 +751,7 @@ static int anx6345_i2c_probe(struct i2c_client *client,
 		return PTR_ERR(anx6345->gpiod_reset);
 	}
 
+	printk("to get dummy client\n");
 	/* Map slave addresses of ANX6345 */
 	for (i = 0; i < I2C_NUM_ADDRESSES; i++) {
 		if (anx6345_i2c_addresses[i] >> 1 != client->addr)
@@ -770,6 +777,7 @@ static int anx6345_i2c_probe(struct i2c_client *client,
 		}
 	}
 
+	printk("to check chipid\n");
 	/* Look for supported chip ID */
 	anx6345_poweron(anx6345);
 	if (anx6345_get_chip_id(anx6345)) {
