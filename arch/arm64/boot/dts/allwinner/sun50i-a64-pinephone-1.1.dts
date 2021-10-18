@@ -52,6 +52,7 @@
 		avdd18-supply = <&reg_ldo_io1>;
 		dvdd18-supply = <&reg_ldo_io1>;
 		avdd33-supply = <&reg_dldo1>;
+		i2c-supply = <&reg_ldo_io0>;
 		vconn-supply = <&reg_vconn5v0>;
 		hdmi_vt-supply = <&reg_dldo1>;
 
