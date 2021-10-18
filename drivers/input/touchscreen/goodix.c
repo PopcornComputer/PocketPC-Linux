@@ -520,9 +520,13 @@ static void goodix_free_irq(struct goodix_ts_data *ts)
 
 static int goodix_request_irq(struct goodix_ts_data *ts)
 {
+	unsigned long irq_flags = ts->irq_flags;
+	if (ts->use_dt_irqflags)
+		irq_flags = IRQF_ONESHOT;
+
 	return devm_request_threaded_irq(&ts->client->dev, ts->client->irq,
 					 NULL, goodix_ts_irq_handler,
-					 ts->irq_flags, ts->client->name, ts);
+					 irq_flags, ts->client->name, ts);
 }
 
 static int goodix_check_cfg_8(struct goodix_ts_data *ts, const u8 *cfg, int len)
@@ -1307,6 +1311,7 @@ static int goodix_ts_probe(struct i2c_client *client)
 	if (!ts)
 		return -ENOMEM;
 
+	ts->use_dt_irqflags = of_property_read_bool(np, "use-dt-irq-flags");
 	ts->client = client;
 	i2c_set_clientdata(client, ts);
 	init_completion(&ts->firmware_loading_complete);
