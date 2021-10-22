@@ -613,6 +613,8 @@ struct imx258 {
 	struct v4l2_ctrl *hblank;
 	struct v4l2_ctrl *exposure;
 
+	struct gpio_desc *pwdn_gpio;
+
 	/* Current mode */
 	const struct imx258_mode *cur_mode;
 
@@ -1011,6 +1013,8 @@ static int imx258_power_on(struct device *dev)
 	struct imx258 *imx258 = to_imx258(sd);
 	int ret;
 
+	gpiod_set_value_cansleep(imx258->pwdn_gpio, 0);
+
 	ret = clk_prepare_enable(imx258->clk);
 	if (ret)
 		dev_err(dev, "failed to enable clock\n");
@@ -1024,6 +1028,8 @@ static int imx258_power_off(struct device *dev)
 	struct imx258 *imx258 = to_imx258(sd);
 
 	clk_disable_unprepare(imx258->clk);
+
+	gpiod_set_value_cansleep(imx258->pwdn_gpio, 1);
 
 	return 0;
 }
@@ -1298,6 +1304,12 @@ static int imx258_probe(struct i2c_client *client)
 		dev_err(&client->dev, "input clock frequency not supported\n");
 		return -EINVAL;
 	}
+
+	/* request optional power down pin */
+	imx258->pwdn_gpio = devm_gpiod_get_optional(&client->dev, "powerdown",
+						    GPIOD_OUT_HIGH);
+	if (IS_ERR(imx258->pwdn_gpio))
+		return PTR_ERR(imx258->pwdn_gpio);
 
 	/* Initialize subdev */
 	v4l2_i2c_subdev_init(&imx258->sd, client, &imx258_subdev_ops);
