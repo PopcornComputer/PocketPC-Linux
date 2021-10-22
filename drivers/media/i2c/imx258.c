@@ -616,6 +616,7 @@ struct imx258 {
 	struct v4l2_ctrl *exposure;
 
 	struct gpio_desc *pwdn_gpio;
+	struct gpio_desc *reset_gpio;
 
 	/* Current mode */
 	const struct imx258_mode *cur_mode;
@@ -1021,7 +1022,11 @@ static int imx258_power_on(struct device *dev)
 	if (ret)
 		dev_err(dev, "failed to enable clock\n");
 
-	return ret;
+	gpiod_set_value_cansleep(imx258->reset_gpio, 0);
+
+	usleep_range(400, 500);
+
+	return 0;
 }
 
 static int imx258_power_off(struct device *dev)
@@ -1031,6 +1036,7 @@ static int imx258_power_off(struct device *dev)
 
 	clk_disable_unprepare(imx258->clk);
 
+	gpiod_set_value_cansleep(imx258->reset_gpio, 1);
 	gpiod_set_value_cansleep(imx258->pwdn_gpio, 1);
 
 	return 0;
@@ -1315,6 +1321,12 @@ static int imx258_probe(struct i2c_client *client)
 						    GPIOD_OUT_HIGH);
 	if (IS_ERR(imx258->pwdn_gpio))
 		return PTR_ERR(imx258->pwdn_gpio);
+
+	/* request optional reset pin */
+	imx258->reset_gpio = devm_gpiod_get_optional(&client->dev, "reset",
+						    GPIOD_OUT_HIGH);
+	if (IS_ERR(imx258->reset_gpio))
+		return PTR_ERR(imx258->reset_gpio);
 
 	/* Initialize subdev */
 	v4l2_i2c_subdev_init(&imx258->sd, client, &imx258_subdev_ops);
