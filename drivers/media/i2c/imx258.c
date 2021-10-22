@@ -80,7 +80,9 @@
 #define REG_CONFIG_FLIP_TEST_PATTERN	0x02
 
 /* Input clock frequency in Hz */
+#define IMX258_INPUT_CLOCK_FREQ_MIN	19000000
 #define IMX258_INPUT_CLOCK_FREQ		19200000
+#define IMX258_INPUT_CLOCK_FREQ_MAX	19400000
 
 struct imx258_reg {
 	u16 address;
@@ -1300,8 +1302,11 @@ static int imx258_probe(struct i2c_client *client)
 	} else {
 		val = clk_get_rate(imx258->clk);
 	}
-	if (val != IMX258_INPUT_CLOCK_FREQ) {
-		dev_err(&client->dev, "input clock frequency not supported\n");
+
+	if (val < IMX258_INPUT_CLOCK_FREQ_MIN
+		|| val > IMX258_INPUT_CLOCK_FREQ_MAX) {
+		dev_err(&client->dev, "input clock frequency %u not supported\n",
+			val);
 		return -EINVAL;
 	}
 
