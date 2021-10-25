@@ -34,7 +34,7 @@
 };
 
 &i2c0 {
-	hdmi-bridge@28 {
+	anx7688: hdmi-bridge@28 {
 		compatible = "analogix,anx7688";
 		reg = <0x28>;
 
@@ -120,4 +120,8 @@
 			remote-endpoint = <&typec0_dr_sw>;
 		};
 	};
+};
+
+&hdmi {
+	extcon = <&anx7688 0>;
 };
