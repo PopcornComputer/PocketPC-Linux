@@ -8,7 +8,7 @@
  * (at your option) any later version.
  */
 
-#define DEBUG
+//#define DEBUG
 
 #include <asm/div64.h>
 #include <linux/clk.h>
@@ -374,7 +374,7 @@ static int gc2145_switch_bank(struct gc2145_dev *sensor, u16 reg)
 			return ret;
 
 		sensor->current_bank = bank;
-		dev_info(&sensor->i2c_client->dev, "bank switch: 0x%02x\n",
+		dev_dbg(&sensor->i2c_client->dev, "bank switch: 0x%02x\n",
 				(unsigned int)sensor->current_bank);
 	}
 
