@@ -120,6 +120,7 @@ static const struct mfd_cell rk818s[] = {
 	{ .name = "rk808-regulator", .id = PLATFORM_DEVID_NONE, },
 	{ .name = "rk808-clkout", },
 	{ .name = "rk818-battery", .of_compatible = "rockchip,rk818-battery", },
+	{ .name = "rk818-charger", .of_compatible = "rockchip,rk818-charger", },
 	{
 		.name = "rk808-rtc",
 		.num_resources = ARRAY_SIZE(rtc_resources),
