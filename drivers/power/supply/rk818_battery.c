@@ -3339,7 +3339,7 @@ static int rk818_bat_parse_dt(struct rk818_battery *di)
 #endif
 
 static const struct of_device_id rk818_battery_of_match[] = {
-	{.compatible = "rk818-battery",},
+	{ .compatible = "rockchip,rk818-battery", },
 	{ },
 };
 
