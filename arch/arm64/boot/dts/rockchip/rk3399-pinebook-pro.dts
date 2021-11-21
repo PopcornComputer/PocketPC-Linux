@@ -441,10 +441,6 @@
 	status = "okay";
 };
 
-&hdmi_sound {
-	status = "okay";
-};
-
 &i2c0 {
 	clock-frequency = <400000>;
 	i2c-scl-falling-time-ns = <4>;
@@ -798,7 +794,7 @@
 };
 
 &pcie_phy {
-	status = "okay";
+	//status = "okay";
 };
 
 &pcie0 {
@@ -810,7 +806,7 @@
 	vpcie0v9-supply = <&vcca0v9_s3>;
 	vpcie1v8-supply = <&vcca1v8_s3>;
 	vpcie3v3-supply = <&vcc3v3_ssd>;
-	status = "okay";
+	//status = "okay";
 };
 
 &pinctrl {
