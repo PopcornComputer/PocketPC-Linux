@@ -2646,6 +2646,19 @@ static int ov5640_copy_fw_to_device(struct ov5640_dev *sensor,
 	return -ETIMEDOUT;
 }
 
+static int ov5640_fw_command(struct ov5640_dev *sensor, int command)
+{
+	int ret;
+
+	ret = ov5640_write_reg(sensor, OV5640_REG_FW_CMD_MAIN, command);
+	if(ret)
+		return ret;
+
+	msleep(5);
+
+	return 0;
+}
+
 static int ov5640_af_init(struct ov5640_dev *sensor)
 {
 	struct i2c_client *client = sensor->i2c_client;
@@ -2683,6 +2696,11 @@ static int ov5640_af_init(struct ov5640_dev *sensor)
 
 	// Set lens focus driver on
 	ret = ov5640_write_reg(sensor, OV5640_REG_VCM_CONTROL4, 0x3f);
+	if (ret)
+		return ret;
+
+	// Set the default focus zone
+	ret = ov5640_fw_command(sensor, OV5640_FW_CMD_ZONE_CONFIG);
 	if (ret)
 		return ret;
 	return ret;
@@ -3314,35 +3332,6 @@ static int ov5640_set_framefmt(struct ov5640_dev *sensor,
 			      is_jpeg ? (BIT(5) | BIT(3)) : 0);
 }
 
-static int ov5640_fw_command(struct ov5640_dev *sensor, int command)
-{
-	u8 fw_ack;
-	int i;
-	int ret;
-
-	ret = ov5640_write_reg(sensor, OV5640_REG_FW_CMD_ACK, 0x01);
-	if(ret)
-		return ret;
-	
-	ret = ov5640_write_reg(sensor, OV5640_REG_FW_CMD_MAIN, command);
-	if(ret)
-		return ret;
-
-	for (i = 0; i < 100; i++) {
-		ret = ov5640_read_reg(sensor, OV5640_REG_FW_CMD_ACK, &fw_ack);
-		if (ret)
-			return ret;
-
-		if (fw_ack == 0){
-			return ret;
-		}
-
-		msleep(50);
-	}
-	return -ETIMEDOUT;
-}
-
-
 /*
  * Sensor Controls.
  */
@@ -3478,26 +3467,6 @@ static int ov5640_set_ctrl_focus(struct ov5640_dev *sensor, int command)
 		return 0;
 	}
 
-	if (command == OV5640_FW_CMD_RELEASE_FOCUS) {
-		dev_dbg(&client->dev, "%s: Releasing autofocus\n",
-			__func__);
-		return ov5640_fw_command(sensor, OV5640_FW_CMD_RELEASE_FOCUS);
-	}
-	
-	// Restart zone config
-	ret = ov5640_fw_command(sensor, OV5640_FW_CMD_ZONE_CONFIG);
-	if (ret)
-		return ret;
-
-	// Set default focus zones
-	ret = ov5640_fw_command(sensor, OV5640_FW_CMD_DEFAULT_ZONES);
-	if (ret)
-		return ret;
-
-	dev_dbg(&client->dev, "%s: Triggering autofocus\n",
-		__func__);
-
-	// Start focussing
 	return ov5640_fw_command(sensor, command);
 }
 
