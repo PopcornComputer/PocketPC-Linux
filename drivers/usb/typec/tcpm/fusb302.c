@@ -787,7 +787,7 @@ static int tcpm_get_cc(struct tcpc_dev *dev, enum typec_cc_status *cc1,
 	mutex_lock(&chip->lock);
 	*cc1 = chip->cc1;
 	*cc2 = chip->cc2;
-	fusb302_log(chip, "cc1=%s, cc2=%s", typec_cc_status_name[*cc1],
+	fusb302_log(chip, "tcpm_get_cc => cc1=%s, cc2=%s (cached)", typec_cc_status_name[*cc1],
 		    typec_cc_status_name[*cc2]);
 	mutex_unlock(&chip->lock);
 
@@ -1073,8 +1073,8 @@ static int fusb302_pd_send_message(struct fusb302_chip *chip,
 	ret = fusb302_i2c_block_write(chip, FUSB_REG_FIFOS, pos, buf);
 	if (ret < 0)
 		return ret;
-	fusb302_log(chip, "sending PD message header: %x", msg->header);
-	fusb302_log(chip, "sending PD message len: %d", len);
+	//fusb302_log(chip, "sending PD message header: %x", msg->header);
+	//fusb302_log(chip, "sending PD message len: %d", len);
 
 	return ret;
 }
@@ -1365,8 +1365,10 @@ static int fusb302_get_src_cc_status(struct fusb302_chip *chip,
 	if (ret < 0)
 		return ret;
 
+	//XXX resolve activity conflicts while measuring
+
 	fusb302_i2c_read(chip, FUSB_REG_SWITCHES0, &status0);
-	fusb302_log(chip, "get_src_cc_status switches: 0x%0x", status0);
+	//fusb302_log(chip, "get_src_cc_status switches: 0x%0x", status0);
 
 	/* Step 2: Set compararator volt to differentiate between Open and Rd */
 	ret = fusb302_i2c_write(chip, FUSB_REG_MEASURE, rd_mda);
@@ -1378,7 +1380,7 @@ static int fusb302_get_src_cc_status(struct fusb302_chip *chip,
 	if (ret < 0)
 		return ret;
 
-	fusb302_log(chip, "get_src_cc_status rd_mda status0: 0x%0x", status0);
+	//fusb302_log(chip, "get_src_cc_status rd_mda status0: 0x%0x", status0);
 	if (status0 & FUSB_REG_STATUS0_COMP) {
 		*cc = TYPEC_CC_OPEN;
 		return 0;
@@ -1394,7 +1396,7 @@ static int fusb302_get_src_cc_status(struct fusb302_chip *chip,
 	if (ret < 0)
 		return ret;
 
-	fusb302_log(chip, "get_src_cc_status ra_mda status0: 0x%0x", status0);
+	//fusb302_log(chip, "get_src_cc_status ra_mda status0: 0x%0x", status0);
 	if (status0 & FUSB_REG_STATUS0_COMP)
 		*cc = TYPEC_CC_RD;
 	else
@@ -1559,8 +1561,8 @@ static int fusb302_pd_read_message(struct fusb302_chip *chip,
 	ret = fusb302_i2c_block_read(chip, FUSB_REG_FIFOS, 4, crc);
 	if (ret < 0)
 		return ret;
-	fusb302_log(chip, "PD message header: %x", msg->header);
-	fusb302_log(chip, "PD message len: %d", len);
+	//fusb302_log(chip, "PD message header: %x", msg->header);
+	//fusb302_log(chip, "PD message len: %d", len);
 
 	/*
 	 * Check if we've read off a GoodCRC message. If so then indicate to
