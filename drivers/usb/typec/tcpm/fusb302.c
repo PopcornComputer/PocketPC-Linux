@@ -1716,14 +1716,16 @@ static void fusb302_irq_work(struct work_struct *work)
 
 	fusb302_print_state(chip);
 
-	if (interrupt & FUSB_REG_INTERRUPT_VBUSOK) {
-		vbus_present = !!(status0 & FUSB_REG_STATUS0_VBUSOK);
+	vbus_present = !!(status0 & FUSB_REG_STATUS0_VBUSOK);
+	if (interrupt & FUSB_REG_INTERRUPT_VBUSOK)
 		fusb302_log(chip, "IRQ: VBUS_OK, vbus=%s",
 			    vbus_present ? "On" : "Off");
-		if (vbus_present != chip->vbus_present) {
-			chip->vbus_present = vbus_present;
-			tcpm_vbus_change(chip->tcpm_port);
-		}
+	if (vbus_present != chip->vbus_present) {
+		chip->vbus_present = vbus_present;
+		if (!(interrupt & FUSB_REG_INTERRUPT_VBUSOK))
+		fusb302_log(chip, "IRQ: VBUS changed without interrupt, vbus=%s",
+			    vbus_present ? "On" : "Off");
+		tcpm_vbus_change(chip->tcpm_port);
 	}
 
 	if (interrupta & FUSB_REG_INTERRUPTA_TOGDONE) {
