@@ -4904,6 +4904,8 @@ int rtw_suspend_wow(_adapter *padapter)
 #endif
 
 	if (pwrpriv->wowlan_mode == _TRUE) {
+		pwrpriv->wowlan_last_wake_reason = 0;
+
 		rtw_mi_netif_stop_queue(padapter);
 		#ifdef CONFIG_CONCURRENT_MODE
 		rtw_mi_buddy_netif_carrier_off(padapter);
