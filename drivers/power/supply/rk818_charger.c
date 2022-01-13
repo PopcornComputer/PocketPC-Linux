@@ -535,7 +535,7 @@ static enum power_supply_property rk818_charger_props[] = {
  */
 static const struct power_supply_desc rk818_charger_desc = {
 	.name			= "rk818-charger",
-	.type			= POWER_SUPPLY_TYPE_BATTERY,
+	.type			= POWER_SUPPLY_TYPE_MAINS,
 	.properties		= rk818_charger_props,
 	.num_properties		= ARRAY_SIZE(rk818_charger_props),
 	.property_is_writeable	= rk818_charger_prop_writeable,
