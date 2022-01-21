@@ -893,70 +893,9 @@ static enum power_supply_property rk818_bat_props[] = {
 	POWER_SUPPLY_PROP_CURRENT_MAX,
 };
 
-static int rk818_bat_get_usb_psy(struct device *dev, void *data)
-{
-	struct rk818_battery *di = data;
-	struct power_supply *psy = dev_get_drvdata(dev);
-
-	if (psy->desc->type == POWER_SUPPLY_TYPE_USB) {
-		di->usb_psy = psy;
-		return 1;
-	}
-
-	return 0;
-}
-
-static int rk818_bat_get_ac_psy(struct device *dev, void *data)
-{
-	struct rk818_battery *di = data;
-	struct power_supply *psy = dev_get_drvdata(dev);
-
-	if (psy->desc->type == POWER_SUPPLY_TYPE_MAINS) {
-		di->ac_psy = psy;
-		return 1;
-	}
-
-	return 0;
-}
-
-static void rk818_bat_get_chrg_psy(struct rk818_battery *di)
-{
-	if (!di->usb_psy)
-		class_for_each_device(power_supply_class, NULL, (void *)di,
-				      rk818_bat_get_usb_psy);
-	if (!di->ac_psy)
-		class_for_each_device(power_supply_class, NULL, (void *)di,
-				      rk818_bat_get_ac_psy);
-}
-
 static int rk818_bat_get_charge_state(struct rk818_battery *di)
 {
-	union power_supply_propval val;
-	int ret;
-
-	if (!di->usb_psy || !di->ac_psy)
-		rk818_bat_get_chrg_psy(di);
-
-	if (di->usb_psy) {
-		ret = di->usb_psy->desc->get_property(di->usb_psy,
-						      POWER_SUPPLY_PROP_ONLINE,
-						      &val);
-		if (!ret)
-			di->usb_in = val.intval;
-	}
-
-	if (di->ac_psy) {
-		ret = di->ac_psy->desc->get_property(di->ac_psy,
-						     POWER_SUPPLY_PROP_ONLINE,
-						     &val);
-		if (!ret)
-			di->ac_in = val.intval;
-	}
-
-	DBG("%s: ac_online=%d, usb_online=%d\n",
-	    __func__, di->ac_in, di->usb_in);
-
-	return (di->usb_in || di->ac_in);
+	return di->current_avg > 0;
 }
 
 static int rk818_battery_get_property(struct power_supply *psy,
