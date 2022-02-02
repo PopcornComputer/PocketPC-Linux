@@ -18,7 +18,11 @@ description: |
 
 properties:
   compatible:
-    const: x-powers,axp813-charger-led
+    oneOf:
+      - const: x-powers,axp813-charger-led
+      - items:
+          - const: x-powers,axp803-charger-led
+          - const: x-powers,axp813-charger-led
 
 required:
   - compatible
