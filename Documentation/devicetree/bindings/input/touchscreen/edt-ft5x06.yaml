@@ -40,6 +40,7 @@ properties:
       - edt,edt-ft5506
       - evervision,ev-ft5726
       - focaltech,ft6236
+      - focaltech,ft8716-ts
 
   reg:
     maxItems: 1
