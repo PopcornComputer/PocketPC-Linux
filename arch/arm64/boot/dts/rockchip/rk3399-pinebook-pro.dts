@@ -1026,6 +1026,7 @@
 &u2phy0 {
 	status = "okay";
 	extcon = <&typec_extcon_bridge>;
+	extcon,ignore-usb;
 
 	u2phy0_otg: otg-port {
 		/*
