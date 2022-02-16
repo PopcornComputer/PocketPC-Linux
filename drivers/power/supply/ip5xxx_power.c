@@ -76,6 +76,8 @@
 
 struct ip5xxx {
 	struct regmap *regmap;
+	struct power_supply_battery_info *bat;
+	int r_int;
 	bool initialized;
 };
 
@@ -171,6 +173,8 @@ static const enum power_supply_property ip5xxx_battery_properties[] = {
 	POWER_SUPPLY_PROP_STATUS,
 	POWER_SUPPLY_PROP_CHARGE_TYPE,
 	POWER_SUPPLY_PROP_HEALTH,
+	POWER_SUPPLY_PROP_CAPACITY,
+	POWER_SUPPLY_PROP_CALIBRATE,
 	POWER_SUPPLY_PROP_VOLTAGE_MAX_DESIGN,
 	POWER_SUPPLY_PROP_VOLTAGE_NOW,
 	POWER_SUPPLY_PROP_VOLTAGE_OCV,
@@ -316,6 +320,7 @@ static int ip5xxx_battery_get_property(struct power_supply *psy,
 	struct ip5xxx *ip5xxx = power_supply_get_drvdata(psy);
 	int raw, ret, vmax;
 	unsigned int rval;
+	union power_supply_propval cur, vol;
 
 	ret = ip5xxx_initialize(psy);
 	if (ret)
@@ -330,6 +335,23 @@ static int ip5xxx_battery_get_property(struct power_supply *psy,
 
 	case POWER_SUPPLY_PROP_HEALTH:
 		return ip5xxx_battery_get_health(ip5xxx, &val->intval);
+
+	case POWER_SUPPLY_PROP_CAPACITY:
+		ret = ip5xxx_battery_get_property(psy, POWER_SUPPLY_PROP_VOLTAGE_NOW, &vol);
+		if (ret)
+			return ret;
+
+		ret = ip5xxx_battery_get_property(psy, POWER_SUPPLY_PROP_CURRENT_NOW, &cur);
+		if (ret)
+			return ret;
+
+		ret = power_supply_batinfo_ocv2cap(ip5xxx->bat,
+			   vol.intval - cur.intval * ip5xxx->r_int / 1000, 20);
+		if (ret < 0)
+			return ret;
+
+		val->intval = ret;
+		return 0;
 
 	case POWER_SUPPLY_PROP_VOLTAGE_MAX_DESIGN:
 		return ip5xxx_battery_get_voltage_max(ip5xxx, &val->intval);
@@ -387,6 +409,10 @@ static int ip5xxx_battery_get_property(struct power_supply *psy,
 			return ret;
 
 		val->intval = vmax + 14000 * 3;
+		return 0;
+
+	case POWER_SUPPLY_PROP_CALIBRATE:
+		val->intval = ip5xxx->r_int;
 		return 0;
 
 	default:
@@ -472,6 +498,12 @@ static int ip5xxx_battery_set_property(struct power_supply *psy,
 		return ip5xxx_update_bits(ip5xxx, IP5XXX_CHG_CTL2,
 					  IP5XXX_CHG_CTL2_CONST_VOLT_SEL, rval);
 
+	case POWER_SUPPLY_PROP_CALIBRATE:
+		if (val->intval < 0 || val->intval > 1000)
+			return -EINVAL;
+		ip5xxx->r_int = val->intval;
+		return 0;
+
 	default:
 		return -EINVAL;
 	}
@@ -482,6 +514,7 @@ static int ip5xxx_battery_property_is_writeable(struct power_supply *psy,
 {
 	return psp == POWER_SUPPLY_PROP_STATUS ||
 	       psp == POWER_SUPPLY_PROP_VOLTAGE_MAX_DESIGN ||
+	       psp == POWER_SUPPLY_PROP_CALIBRATE ||
 	       psp == POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT ||
 	       psp == POWER_SUPPLY_PROP_CONSTANT_CHARGE_VOLTAGE;
 }
@@ -592,6 +625,7 @@ static int ip5xxx_power_probe(struct i2c_client *client)
 	struct device *dev = &client->dev;
 	struct power_supply *psy;
 	struct ip5xxx *ip5xxx;
+	int ret;
 
 	ip5xxx = devm_kzalloc(dev, sizeof(*ip5xxx), GFP_KERNEL);
 	if (!ip5xxx)
@@ -611,6 +645,15 @@ static int ip5xxx_power_probe(struct i2c_client *client)
 	psy = devm_power_supply_register(dev, &ip5xxx_boost_desc, &psy_cfg);
 	if (IS_ERR(psy))
 		return PTR_ERR(psy);
+
+	ret = power_supply_get_battery_info(psy, &ip5xxx->bat);
+	if (ret)
+		return dev_err_probe(dev, ret, "Failed to get battery info\n");
+
+	if (ip5xxx->bat->factory_internal_resistance_uohm >= 0)
+		ip5xxx->r_int = ip5xxx->bat->factory_internal_resistance_uohm / 1000;
+	else
+		ip5xxx->r_int = 120;
 
 	return 0;
 }
