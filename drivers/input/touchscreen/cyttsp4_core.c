@@ -1903,6 +1903,9 @@ static int cyttsp4_setup_input_device(struct cyttsp4 *cd)
 	for (i = 0; i < cd->n_signals; i++) {
 		signal = &cd->signals[i];
 
+		if (signal->signal < 0)
+			continue;
+
 		__set_bit(signal->signal, cd->input->absbit);
 
 		max = signal->max;
