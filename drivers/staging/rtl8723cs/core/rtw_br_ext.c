@@ -97,6 +97,7 @@ static __inline__ int __nat25_add_pppoe_tag(struct sk_buff *skb, struct pppoe_ta
 {
 	struct pppoe_hdr *ph = (struct pppoe_hdr *)(skb->data + ETH_HLEN);
 	int data_len;
+	int ph_len = ntohs(ph->length);
 
 	data_len = tag->tag_len + TAG_HDR_LEN;
 	if (skb_tailroom(skb) < data_len) {
@@ -105,9 +106,10 @@ static __inline__ int __nat25_add_pppoe_tag(struct sk_buff *skb, struct pppoe_ta
 	}
 
 	skb_put(skb, data_len);
+
 	/* have a room for new tag */
-	memmove(((unsigned char *)ph->tag + data_len), (unsigned char *)ph->tag, ntohs(ph->length));
-	ph->length = htons(ntohs(ph->length) + data_len);
+	memmove(((unsigned char *)ph->tag + data_len), (unsigned char *)ph->tag, ph_len);
+	ph->length = htons(ph_len + data_len);
 	memcpy((unsigned char *)ph->tag, tag, data_len);
 	return data_len;
 }
