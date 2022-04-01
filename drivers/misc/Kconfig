@@ -505,6 +505,13 @@ config OPEN_DICE
 
 	  If unsure, say N.
 
+config PPKB_POWER_MANAGER
+	tristate "Power manager for Pinephone keyboard."
+	depends on OF
+	help
+	  This driver coordinates Pinephone keyboard power use between Pinephone
+	  keyboard battery and Pinephone battery.
+
 config VCPU_STALL_DETECTOR
 	tristate "Guest vCPU stall detector"
 	depends on OF && HAS_IOMEM
