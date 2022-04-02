@@ -44,6 +44,8 @@
 #define IP5XXX_GPIO_CTL2		0x53
 #define IP5XXX_GPIO_CTL2A		0x54
 #define IP5XXX_GPIO_CTL3		0x55
+#define IP5XXX_STATUS			0x70
+#define IP5XXX_STATUS_BOOST_ON			BIT(2)
 #define IP5XXX_READ0			0x71
 #define IP5XXX_READ0_CHG_STAT			GENMASK(7, 5)
 #define IP5XXX_READ0_CHG_STAT_IDLE		(0x0 << 5)
@@ -539,6 +541,7 @@ static const struct power_supply_desc ip5xxx_battery_desc = {
 
 static const enum power_supply_property ip5xxx_boost_properties[] = {
 	POWER_SUPPLY_PROP_ONLINE,
+	POWER_SUPPLY_PROP_PRESENT,
 	POWER_SUPPLY_PROP_VOLTAGE_MIN_DESIGN,
 };
 
@@ -561,6 +564,14 @@ static int ip5xxx_boost_get_property(struct power_supply *psy,
 			return ret;
 
 		val->intval = !!(rval & IP5XXX_SYS_CTL0_BOOST_EN);
+		return 0;
+
+	case POWER_SUPPLY_PROP_PRESENT:
+		ret = ip5xxx_read(ip5xxx, IP5XXX_STATUS, &rval);
+		if (ret)
+			return ret;
+
+		val->intval = !!(rval & IP5XXX_STATUS_BOOST_ON);
 		return 0;
 
 	case POWER_SUPPLY_PROP_VOLTAGE_MIN_DESIGN:
@@ -608,7 +619,7 @@ static int ip5xxx_boost_set_property(struct power_supply *psy,
 static int ip5xxx_boost_property_is_writeable(struct power_supply *psy,
 					      enum power_supply_property psp)
 {
-	return true;
+	return psp != POWER_SUPPLY_PROP_PRESENT;
 }
 
 static const struct power_supply_desc ip5xxx_boost_desc = {
