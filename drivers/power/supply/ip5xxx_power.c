@@ -122,18 +122,28 @@ static int ip5xxx_initialize(struct power_supply *psy)
 		return 0;
 
 	/*
+	 * Disable flashlight feature.
+	 */
+	ret = ip5xxx_update_bits(ip5xxx, IP5XXX_SYS_CTL0,
+				 IP5XXX_SYS_CTL0_WLED_DET_EN |
+				 IP5XXX_SYS_CTL0_WLED_EN,
+				 0);
+	if (ret)
+		return ret;
+
+	/*
 	 * Disable shutdown under light load.
 	 * Enable power on when under load.
 	 */
 	ret = ip5xxx_update_bits(ip5xxx, IP5XXX_SYS_CTL1,
 				 IP5XXX_SYS_CTL1_LIGHT_SHDN_EN |
 				 IP5XXX_SYS_CTL1_LOAD_PWRUP_EN,
-				 IP5XXX_SYS_CTL1_LOAD_PWRUP_EN);
+				 0);
 	if (ret)
 		return ret;
 
 	/*
-	 * Enable shutdown after a long button press (as configured below).
+	 * Enable shutdown after a double press (as configured below).
 	 */
 	ret = ip5xxx_update_bits(ip5xxx, IP5XXX_SYS_CTL3,
 				 IP5XXX_SYS_CTL3_BTN_SHDN_EN,
@@ -142,7 +152,7 @@ static int ip5xxx_initialize(struct power_supply *psy)
 		return ret;
 
 	/*
-	 * Power on automatically when VIN is removed.
+	 * Don't power on automatically when VIN is removed.
 	 */
 	ret = ip5xxx_update_bits(ip5xxx, IP5XXX_SYS_CTL4,
 				 IP5XXX_SYS_CTL4_VIN_PULLOUT_BOOST_EN,
@@ -152,14 +162,12 @@ static int ip5xxx_initialize(struct power_supply *psy)
 
 	/*
 	 * Enable the NTC.
-	 * Configure the button for two presses => LED, long press => shutdown.
+	 * Configure the button for two presses => shutdown, long press => LED.
 	 */
 	ret = ip5xxx_update_bits(ip5xxx, IP5XXX_SYS_CTL5,
 				 IP5XXX_SYS_CTL5_NTC_DIS |
 				 IP5XXX_SYS_CTL5_WLED_MODE_SEL |
-				 IP5XXX_SYS_CTL5_BTN_SHDN_SEL,
-				 IP5XXX_SYS_CTL5_WLED_MODE_SEL |
-				 IP5XXX_SYS_CTL5_BTN_SHDN_SEL);
+				 IP5XXX_SYS_CTL5_BTN_SHDN_SEL, 0);
 	if (ret)
 		return ret;
 
