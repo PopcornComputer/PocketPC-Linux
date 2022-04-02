@@ -897,12 +897,10 @@ static int rk818_bat_get_charge_state(struct rk818_battery *di)
 	return di->current_avg > 0;
 }
 
-static int rk818_battery_get_property(struct power_supply *psy,
-				      enum power_supply_property psp,
-				      union power_supply_propval *val)
+int rk818_battery_get_property(struct rk818_battery *di,
+			       enum power_supply_property psp,
+			       union power_supply_propval *val)
 {
-	struct rk818_battery *di = power_supply_get_drvdata(psy);
-
 	switch (psp) {
 	case POWER_SUPPLY_PROP_CURRENT_NOW:
 		val->intval = di->current_avg * 1000;/*uA*/
@@ -961,16 +959,26 @@ static int rk818_battery_get_property(struct power_supply *psy,
 
 	return 0;
 }
+EXPORT_SYMBOL_GPL(rk818_battery_get_property);
+
+static int rk818_battery_get_property_psy(struct power_supply *psy,
+				      enum power_supply_property psp,
+				      union power_supply_propval *val)
+{
+	struct rk818_battery *di = power_supply_get_drvdata(psy);
+
+	return rk818_battery_get_property(di, psp, val);
+}
 
 static const struct power_supply_desc rk818_bat_desc = {
 	.name		= "battery",
 	.type		= POWER_SUPPLY_TYPE_BATTERY,
 	.properties	= rk818_bat_props,
 	.num_properties	= ARRAY_SIZE(rk818_bat_props),
-	.get_property	= rk818_battery_get_property,
+	.get_property	= rk818_battery_get_property_psy,
 };
 
-static int rk818_bat_init_power_supply(struct rk818_battery *di)
+static __maybe_unused int rk818_bat_init_power_supply(struct rk818_battery *di)
 {
 	struct power_supply_config psy_cfg = { .drv_data = di, };
 
@@ -2422,7 +2430,10 @@ static void rk818_bat_power_supply_changed(struct rk818_battery *di)
 	status = (status & CHRG_STATUS_MSK) >> 4;
 	old_soc = di->dsoc;
 	di->last_dsoc = di->dsoc;
-	power_supply_changed(di->bat);
+
+	if (di->bat)
+		power_supply_changed(di->bat);
+
 	BAT_INFO("changed: dsoc=%d, rsoc=%d, v=%d, ov=%d c=%d, "
 		 "cap=%d, f=%d, st=%s, hotdie=%d\n",
 		 di->dsoc, di->rsoc, di->voltage_avg, di->voltage_ocv,
@@ -3251,6 +3262,14 @@ static const struct of_device_id rk818_battery_of_match[] = {
 	{ },
 };
 
+static struct rk818_battery* bat;
+
+struct rk818_battery* rk818_battery_get(void)
+{
+	return bat;
+}
+EXPORT_SYMBOL_GPL(rk818_battery_get);
+
 static int rk818_battery_probe(struct platform_device *pdev)
 {
 	const struct of_device_id *of_id =
@@ -3291,11 +3310,13 @@ static int rk818_battery_probe(struct platform_device *pdev)
 		return ret;
 	}
 
+	/*
 	ret = rk818_bat_init_power_supply(di);
 	if (ret) {
 		dev_err(di->dev, "rk818 power supply register failed!\n");
 		return ret;
 	}
+	*/
 
 	rk818_bat_init_info(di);
 	rk818_bat_init_fg(di);
@@ -3309,6 +3330,7 @@ static int rk818_battery_probe(struct platform_device *pdev)
 
 	BAT_INFO("driver version %s\n", DRIVER_VERSION);
 
+	bat = di;
 	return ret;
 }
 

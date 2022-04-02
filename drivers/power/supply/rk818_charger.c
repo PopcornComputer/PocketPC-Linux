@@ -355,13 +355,35 @@ static int rk818_charger_get_voltage_max(struct rk818_charger *cg, int *val)
 	return 0;
 }
 
+struct rk818_battery;
+struct rk818_battery* rk818_battery_get(void);
+int rk818_battery_get_property(struct rk818_battery *di,
+			       enum power_supply_property psp,
+			       union power_supply_propval *val);
+
 static int rk818_charger_get_property(struct power_supply *psy,
 				      enum power_supply_property psp,
 				      union power_supply_propval *val)
 {
 	struct rk818_charger *cg = power_supply_get_drvdata(psy);
+	struct rk818_battery* di = rk818_battery_get();
 	unsigned reg;
 	int ret;
+
+	switch (psp) {
+		case POWER_SUPPLY_PROP_CURRENT_NOW:
+		case POWER_SUPPLY_PROP_VOLTAGE_NOW:
+		case POWER_SUPPLY_PROP_PRESENT:
+		case POWER_SUPPLY_PROP_CAPACITY:
+		case POWER_SUPPLY_PROP_TEMP:
+		case POWER_SUPPLY_PROP_STATUS:
+		case POWER_SUPPLY_PROP_CHARGE_COUNTER:
+		case POWER_SUPPLY_PROP_CHARGE_FULL:
+			if (!di)
+				return -ENODEV;
+			return rk818_battery_get_property(di, psp, val);
+		default:;
+	}
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_ONLINE:
@@ -373,6 +395,20 @@ static int rk818_charger_get_property(struct power_supply *psy,
 
 		val->intval = !!(reg & RK818_CHRG_CTRL_REG1_CHRG_EN);
 		break;
+
+	case POWER_SUPPLY_PROP_CHARGE_BEHAVIOUR:
+		ret = regmap_read(cg->regmap, RK818_CHRG_CTRL_REG1, &reg);
+		if (ret) {
+			dev_err(cg->dev, "failed to read the charger state (%d)\n", ret);
+			return ret;
+		}
+
+		if (reg & RK818_CHRG_CTRL_REG1_CHRG_EN)
+			val->intval = POWER_SUPPLY_CHARGE_BEHAVIOUR_AUTO;
+		else
+			val->intval = POWER_SUPPLY_CHARGE_BEHAVIOUR_INHIBIT_CHARGE;
+
+		return 0;
 
 	case POWER_SUPPLY_PROP_STATUS:
 		ret = regmap_read(cg->regmap, RK818_SUP_STS_REG, &reg);
@@ -480,14 +516,18 @@ static int rk818_charger_set_property(struct power_supply *psy,
 	int ret;
 
 	switch (psp) {
-	case POWER_SUPPLY_PROP_ONLINE:
-		ret = regmap_update_bits(cg->regmap, RK818_CHRG_CTRL_REG1,
-					 RK818_CHRG_CTRL_REG1_CHRG_EN,
-					 val->intval ? RK818_CHRG_CTRL_REG1_CHRG_EN : 0);
-		if (ret)
-			dev_err(cg->dev, "failed to setup the charger (%d)\n", ret);
-
-		return ret;
+	case POWER_SUPPLY_PROP_CHARGE_BEHAVIOUR:
+		switch (val->intval) {
+		case POWER_SUPPLY_CHARGE_BEHAVIOUR_AUTO:
+			return regmap_update_bits(cg->regmap, RK818_CHRG_CTRL_REG1,
+						  RK818_CHRG_CTRL_REG1_CHRG_EN,
+						  RK818_CHRG_CTRL_REG1_CHRG_EN);
+		case POWER_SUPPLY_CHARGE_BEHAVIOUR_INHIBIT_CHARGE:
+			return regmap_update_bits(cg->regmap, RK818_CHRG_CTRL_REG1,
+						  RK818_CHRG_CTRL_REG1_CHRG_EN, 0);
+		default:
+			return -EINVAL;
+		}
 
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_VOLTAGE:
                 return rk818_charger_set_voltage_max(cg, val->intval);
@@ -506,7 +546,7 @@ static int rk818_charger_prop_writeable(struct power_supply *psy,
 	switch (psp) {
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_VOLTAGE:
-	case POWER_SUPPLY_PROP_ONLINE:
+	case POWER_SUPPLY_PROP_CHARGE_BEHAVIOUR:
 		return 1;
 
 	default:
@@ -518,6 +558,7 @@ static enum power_supply_property rk818_charger_props[] = {
 	POWER_SUPPLY_PROP_ONLINE,
 	POWER_SUPPLY_PROP_HEALTH,
 	POWER_SUPPLY_PROP_STATUS,
+	POWER_SUPPLY_PROP_CHARGE_BEHAVIOUR,
 	POWER_SUPPLY_PROP_CHARGE_TYPE,
 	POWER_SUPPLY_PROP_CHARGE_TERM_CURRENT,
 	POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT,
@@ -525,17 +566,25 @@ static enum power_supply_property rk818_charger_props[] = {
 	POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT_MAX,
 	POWER_SUPPLY_PROP_CONSTANT_CHARGE_VOLTAGE_MAX,
 	POWER_SUPPLY_PROP_PRECHARGE_CURRENT,
+
+	// inherited from BSP battery driver
+	POWER_SUPPLY_PROP_CURRENT_NOW,
+	POWER_SUPPLY_PROP_VOLTAGE_NOW,
+	POWER_SUPPLY_PROP_PRESENT,
+	POWER_SUPPLY_PROP_CAPACITY,
+	POWER_SUPPLY_PROP_TEMP,
+	POWER_SUPPLY_PROP_CHARGE_COUNTER,
+	POWER_SUPPLY_PROP_CHARGE_FULL,
 };
 
 /*
- * TODO: This functionality should be in a battery driver/supply, but that one
- * is such a mess, I don't want to touch it now. Let's have a separate supply
- * for controlling the charger for now, and a prayer for the poor soul that
- * will have to understand and clean up the battery driver.
+ * We import some capacity tracking functionality from the BSP battery driver.
+ * Some poor soul will have to understand and clean up the BSP battery driver,
+ * but not me, not now. :)
  */
 static const struct power_supply_desc rk818_charger_desc = {
-	.name			= "rk818-charger",
-	.type			= POWER_SUPPLY_TYPE_MAINS,
+	.name			= "rk818-battery",
+	.type			= POWER_SUPPLY_TYPE_BATTERY,
 	.properties		= rk818_charger_props,
 	.num_properties		= ARRAY_SIZE(rk818_charger_props),
 	.property_is_writeable	= rk818_charger_prop_writeable,
