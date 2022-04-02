@@ -46,6 +46,7 @@
 #define IP5XXX_GPIO_CTL3		0x55
 #define IP5XXX_STATUS			0x70
 #define IP5XXX_STATUS_BOOST_ON			BIT(2)
+#define IP5XXX_STATUS_VIN_PRESENT		BIT(4)
 #define IP5XXX_READ0			0x71
 #define IP5XXX_READ0_CHG_STAT			GENMASK(7, 5)
 #define IP5XXX_READ0_CHG_STAT_IDLE		(0x0 << 5)
@@ -632,6 +633,45 @@ static const struct power_supply_desc ip5xxx_boost_desc = {
 	.property_is_writeable	= ip5xxx_boost_property_is_writeable,
 };
 
+static const enum power_supply_property ip5xxx_usb_properties[] = {
+	POWER_SUPPLY_PROP_PRESENT,
+};
+
+static int ip5xxx_usb_get_property(struct power_supply *psy,
+				     enum power_supply_property psp,
+				     union power_supply_propval *val)
+{
+	struct ip5xxx *ip5xxx = power_supply_get_drvdata(psy);
+	unsigned int rval;
+	int ret;
+
+	ret = ip5xxx_initialize(psy);
+	if (ret)
+		return ret;
+
+	switch (psp) {
+	case POWER_SUPPLY_PROP_PRESENT:
+		ret = ip5xxx_read(ip5xxx, IP5XXX_STATUS, &rval);
+		if (ret)
+			return ret;
+
+		val->intval = !!(rval & IP5XXX_STATUS_VIN_PRESENT);
+		return 0;
+
+	default:
+		return -EINVAL;
+	}
+}
+
+static const struct power_supply_desc ip5xxx_usb_desc = {
+	.name			= "ip5xxx-usb",
+	.type			= POWER_SUPPLY_TYPE_USB,
+	.properties		= ip5xxx_usb_properties,
+	.num_properties		= ARRAY_SIZE(ip5xxx_usb_properties),
+	.get_property		= ip5xxx_usb_get_property,
+	.property_is_writeable	= ip5xxx_boost_property_is_writeable,
+};
+
 static const struct regmap_config ip5xxx_regmap_config = {
 	.reg_bits		= 8,
 	.val_bits		= 8,
@@ -662,6 +702,10 @@ static int ip5xxx_power_probe(struct i2c_client *client)
 		return PTR_ERR(psy);
 
 	psy = devm_power_supply_register(dev, &ip5xxx_boost_desc, &psy_cfg);
+	if (IS_ERR(psy))
+		return PTR_ERR(psy);
+
+	psy = devm_power_supply_register(dev, &ip5xxx_usb_desc, &psy_cfg);
 	if (IS_ERR(psy))
 		return PTR_ERR(psy);
 
