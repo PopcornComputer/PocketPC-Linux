@@ -427,6 +427,15 @@
 		enable-gpios = <&pio 3 2 GPIO_ACTIVE_HIGH>; /* PD2 */
 		vcc-supply = <&reg_dcdc1>;
 	};
+
+	keyboard-power {
+		compatible = "megi,pinephone-keyboard-power-manager";
+		phone-battery = "axp20x-battery";
+		phone-usb = "axp20x-usb";
+		kb-battery = "ip5xxx-battery";
+		kb-boost = "ip5xxx-boost";
+		kb-usb = "ip5xxx-usb";
+	};
 };
 
 &codec {
