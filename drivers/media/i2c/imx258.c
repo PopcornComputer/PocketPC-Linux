@@ -1041,6 +1041,7 @@ static int imx258_power_on(struct device *dev)
 	ret = clk_prepare_enable(imx258->clk);
 	if (ret) {
 		dev_err(dev, "failed to enable clock\n");
+		gpiod_set_value_cansleep(imx258->pwdn_gpio, 1);
 		regulator_bulk_disable(IMX258_SUPPLY_COUNT, imx258->supplies);
 		return ret;
 	}
