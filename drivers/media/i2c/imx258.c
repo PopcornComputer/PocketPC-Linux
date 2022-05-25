@@ -76,13 +76,15 @@
 
 /* Orientation */
 #define REG_MIRROR_FLIP_CONTROL		0x0101
-#define REG_CONFIG_MIRROR_FLIP		0x03
-#define REG_CONFIG_FLIP_TEST_PATTERN	0x02
+#define REG_CONFIG_MIRROR_FLIP		0x00
+#define REG_CONFIG_FLIP_TEST_PATTERN	0x00
 
 /* Input clock frequency in Hz */
 #define IMX258_INPUT_CLOCK_FREQ_MIN	24000000
 #define IMX258_INPUT_CLOCK_FREQ		24000000
 #define IMX258_INPUT_CLOCK_FREQ_MAX	24000000
+
+#define IMX258_MBUS_FORMAT		MEDIA_BUS_FMT_SRGGB10_1X10
 
 /* regs */
 #define PLL_MULT_DRIV                  0x0310
@@ -820,7 +822,7 @@ static int imx258_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
 	/* Initialize try_fmt */
 	try_fmt->width = supported_modes[0].width;
 	try_fmt->height = supported_modes[0].height;
-	try_fmt->code = MEDIA_BUS_FMT_SGRBG10_1X10;
+	try_fmt->code = IMX258_MBUS_FORMAT;
 	try_fmt->field = V4L2_FIELD_NONE;
 
 	return 0;
@@ -932,7 +934,7 @@ static int imx258_enum_mbus_code(struct v4l2_subdev *sd,
 	if (code->index > 0)
 		return -EINVAL;
 
-	code->code = MEDIA_BUS_FMT_SGRBG10_1X10;
+	code->code = IMX258_MBUS_FORMAT;
 
 	return 0;
 }
@@ -944,7 +946,7 @@ static int imx258_enum_frame_size(struct v4l2_subdev *sd,
 	if (fse->index >= ARRAY_SIZE(supported_modes))
 		return -EINVAL;
 
-	if (fse->code != MEDIA_BUS_FMT_SGRBG10_1X10)
+	if (fse->code != IMX258_MBUS_FORMAT)
 		return -EINVAL;
 
 	fse->min_width = supported_modes[fse->index].width;
@@ -960,7 +962,7 @@ static void imx258_update_pad_format(const struct imx258_mode *mode,
 {
 	fmt->format.width = mode->width;
 	fmt->format.height = mode->height;
-	fmt->format.code = MEDIA_BUS_FMT_SGRBG10_1X10;
+	fmt->format.code = IMX258_MBUS_FORMAT;
 	fmt->format.field = V4L2_FIELD_NONE;
 }
 
@@ -1008,7 +1010,7 @@ static int imx258_set_pad_format(struct v4l2_subdev *sd,
 	mutex_lock(&imx258->mutex);
 
 	/* Only one raw bayer(GBRG) order is supported */
-	fmt->format.code = MEDIA_BUS_FMT_SGRBG10_1X10;
+	fmt->format.code = IMX258_MBUS_FORMAT;
 
 	mode = v4l2_find_nearest_size(supported_modes,
 		ARRAY_SIZE(supported_modes), width, height,
