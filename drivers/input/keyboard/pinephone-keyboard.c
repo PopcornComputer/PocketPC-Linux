@@ -15,6 +15,10 @@
 #include <linux/regulator/consumer.h>
 #include <linux/types.h>
 
+static bool disable_input;
+module_param(disable_input, bool, S_IRUGO);
+MODULE_PARM_DESC(disable_input, "Disable the keyboard part of the driver");
+
 #define DRV_NAME			"pinephone-keyboard"
 
 #define PPKB_CRC8_POLYNOMIAL		0x07
@@ -405,6 +409,9 @@ static int ppkb_probe(struct i2c_client *client)
 			return error;
 		}
 	}
+
+	if (disable_input)
+		return 0;
 
 	crc8_populate_msb(ppkb->crc_table, PPKB_CRC8_POLYNOMIAL);
 
