@@ -443,11 +443,11 @@ static const struct imx258_reg common_regs[] = {
 	REG8(HDR_MODE, 0x00),
 };
 
-static const struct imx258_reg mode_4208x3118_regs[] = {
+static const struct imx258_reg mode_4208x3120_regs[] = {
 	REG16(CSI_DT_FMT, 0x0a0a),
 	REG8(CSI_LANE_MODE, 0x03),
 	REG16(LINE_LENGTH_PCK, 5352),
-	REG16(FRM_LENGTH_LINES, 3152),
+	REG16(FRM_LENGTH_LINES, 3224),
 	REG16(X_ADD_STA, 0),
 	REG16(Y_ADD_STA, 0),
 	REG16(X_ADD_END, 4207),
@@ -470,7 +470,7 @@ static const struct imx258_reg mode_4208x3118_regs[] = {
 	REG16(X_OUT_SIZE, 4208),
 	REG16(Y_OUT_SIZE, 3120),
 	REG8(FRM_LENGTH_CTL, 0x01),
-	REG16(COARSE_INTEG_TIME, 3142),
+	REG16(COARSE_INTEG_TIME, 3184),
 };
 
 static const struct imx258_reg mode_4032x3024_regs[] = {
@@ -633,12 +633,12 @@ static const struct imx258_link_freq_config link_freq_configs[] = {
 static const struct imx258_mode supported_modes[] = {
 	{
 		.width = 4208,
-		.height = 3118,
+		.height = 3120,
 		.vts_def = IMX258_VTS_30FPS,
 		.vts_min = IMX258_VTS_30FPS,
 		.reg_list = {
-			.num_of_regs = ARRAY_SIZE(mode_4208x3118_regs),
-			.regs = mode_4208x3118_regs,
+			.num_of_regs = ARRAY_SIZE(mode_4208x3120_regs),
+			.regs = mode_4208x3120_regs,
 		},
 		.link_freq_index = IMX258_LINK_FREQ_1224MBPS,
 	},
