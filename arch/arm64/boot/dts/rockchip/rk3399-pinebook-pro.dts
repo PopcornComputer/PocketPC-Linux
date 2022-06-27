@@ -1118,6 +1118,7 @@
 &usbdrd_dwc3_0 {
 	dr_mode = "otg";
 	extcon = <&typec_extcon_bridge>;
+	snps,usb3-phy-reset-quirk;
 	status = "okay";
 };
 
