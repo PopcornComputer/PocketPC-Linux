@@ -51,6 +51,8 @@ struct rk818_charger {
 
 	struct power_supply *usb_psy;
 	struct power_supply *charger_psy;
+
+	bool apply_ilim;
 };
 
 // {{{ USB supply
@@ -71,6 +73,8 @@ static int rk818_usb_set_input_current_max(struct rk818_charger *cg,
 		reg = 3 + (val - 1000000) / 250000;
 	else
 		reg = 11;
+
+	dev_info(cg->dev, "applying input current limit %d mA\n", val / 1000);
 
 	ret = regmap_update_bits(cg->regmap, RK818_USB_CTRL_REG,
 				 RK818_USB_CTRL_USB_ILIM_MASK, reg);
@@ -241,6 +245,19 @@ static void rk818_usb_power_external_power_changed(struct power_supply *psy)
 						      &val);
 	if (ret)
 		return;
+
+	/*
+	 * We only want to start applying input current limit after we get first
+	 * non-0 value from the supplier. Until then, we keep the limit applied
+	 * by the bootloader. If we lower the limit before the charger is properly
+	 * detected, we risk boot failure due to insufficient power.
+	 */
+	if (!cg->apply_ilim) {
+		if (!val.intval)
+			return;
+
+		cg->apply_ilim = true;
+	}
 
 	if (val.intval < 500000)
 		val.intval = 500000;
