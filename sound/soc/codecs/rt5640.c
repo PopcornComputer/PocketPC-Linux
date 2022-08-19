@@ -653,8 +653,8 @@ static const struct snd_kcontrol_new rt5640_spk_r_mix[] = {
 };
 
 static const struct snd_kcontrol_new rt5640_out_l_mix[] = {
-	SOC_DAPM_SINGLE("SPK MIXL Switch", RT5640_OUT_L3_MIXER,
-			RT5640_M_SM_L_OM_L_SFT, 1, 1),
+	SOC_DAPM_SINGLE("BST3 Switch", RT5640_OUT_L3_MIXER,
+			RT5640_M_BST3_OM_L_SFT, 1, 1),
 	SOC_DAPM_SINGLE("BST1 Switch", RT5640_OUT_L3_MIXER,
 			RT5640_M_BST1_OM_L_SFT, 1, 1),
 	SOC_DAPM_SINGLE("INL Switch", RT5640_OUT_L3_MIXER,
@@ -670,10 +670,10 @@ static const struct snd_kcontrol_new rt5640_out_l_mix[] = {
 };
 
 static const struct snd_kcontrol_new rt5640_out_r_mix[] = {
-	SOC_DAPM_SINGLE("SPK MIXR Switch", RT5640_OUT_R3_MIXER,
-			RT5640_M_SM_L_OM_R_SFT, 1, 1),
 	SOC_DAPM_SINGLE("BST2 Switch", RT5640_OUT_R3_MIXER,
-			RT5640_M_BST4_OM_R_SFT, 1, 1),
+			RT5640_M_BST2_OM_R_SFT, 1, 1),
+	SOC_DAPM_SINGLE("BST3 Switch", RT5640_OUT_R3_MIXER,
+			RT5640_M_BST3_OM_R_SFT, 1, 1),
 	SOC_DAPM_SINGLE("BST1 Switch", RT5640_OUT_R3_MIXER,
 			RT5640_M_BST1_OM_R_SFT, 1, 1),
 	SOC_DAPM_SINGLE("INR Switch", RT5640_OUT_R3_MIXER,
@@ -1605,8 +1605,8 @@ static const struct snd_soc_dapm_route rt5640_specific_dapm_routes[] = {
 	{"SPK MIXL", "DAC L2 Switch", "DAC L2"},
 	{"SPK MIXR", "DAC R2 Switch", "DAC R2"},
 
-	{"OUT MIXL", "SPK MIXL Switch", "SPK MIXL"},
-	{"OUT MIXR", "SPK MIXR Switch", "SPK MIXR"},
+	{"OUT MIXL", "BST3 Switch", "BST3"},
+	{"OUT MIXR", "BST3 Switch", "BST3"},
 
 	{"OUT MIXL", "DAC R2 Switch", "DAC R2"},
 	{"OUT MIXL", "DAC L2 Switch", "DAC L2"},
