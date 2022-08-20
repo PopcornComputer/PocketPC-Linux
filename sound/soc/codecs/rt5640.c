@@ -997,7 +997,8 @@ static int rt5640_lout_event(struct snd_soc_dapm_widget *w,
 
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMU:
-		hp_amp_power_on(component);
+		//hp_amp_power_on(component);
+		//XXX: ^^ breaks hpout restore
 		snd_soc_component_update_bits(component, RT5640_PWR_ANLG1,
 			RT5640_PWR_LM, RT5640_PWR_LM);
 		snd_soc_component_update_bits(component, RT5640_OUTPUT,
