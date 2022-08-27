@@ -856,6 +856,11 @@ static int axp20x_power_probe(struct platform_device *pdev)
 		ret = regmap_update_bits(axp20x_batt->regmap, 0x84, 0x37, 0x31);
 		if (ret)
 			goto warn_bat;
+
+		// enable poweron by RTC
+		ret = regmap_update_bits(axp20x_batt->regmap, 0x8f, BIT(7), BIT(7));
+		if (ret)
+			goto warn_bat;
 	}
 
 	return 0;
