@@ -1213,6 +1213,13 @@
 			compatible = "rockchip,rk3399-pmu-io-voltage-domain";
 			status = "disabled";
 		};
+
+		reboot-mode {
+			compatible = "syscon-reboot-mode";
+			offset = <0x300>;
+			mode-normal = <0>;
+			mode-maskrom = <0xef08a53c>;
+		};
 	};
 
 	spi3: spi@ff350000 {
