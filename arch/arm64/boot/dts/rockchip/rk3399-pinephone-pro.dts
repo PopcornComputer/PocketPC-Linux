@@ -69,6 +69,12 @@
 		};
 	};
 
+	vibrator {
+		compatible = "gpio-vibrator";
+		enable-gpios = <&gpio3 RK_PB1 GPIO_ACTIVE_HIGH>;
+		vcc-supply = <&vcc3v3_sys>;
+	};
+
 	vcc_sys: vcc-sys-regulator {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc_sys";
