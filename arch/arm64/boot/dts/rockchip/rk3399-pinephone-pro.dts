@@ -953,6 +953,14 @@
 	};
 };
 
+/* This bus is exposed on POGO pins */
+&i2c5 {
+	i2c-scl-rising-time-ns = <450>;
+	i2c-scl-falling-time-ns = <15>;
+	pinctrl-0 = <&i2c5_xfer &pogo_int_pin>;
+	status = "okay";
+};
+
 &i2s0 {
 	rockchip,playback-channels = <2>;
 	rockchip,capture-channels = <2>;
@@ -1179,6 +1187,12 @@
 
 		vsel2_pin: vsel2-pin {
 			rockchip,pins = <1 RK_PB6 RK_FUNC_GPIO &pcfg_pull_down>;
+		};
+	};
+
+	pogo {
+		pogo_int_pin: pogo-int {
+			rockchip,pins = <3 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
