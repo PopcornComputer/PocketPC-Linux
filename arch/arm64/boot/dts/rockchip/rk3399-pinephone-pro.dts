@@ -943,6 +943,14 @@
 			"0", "-1", "0",
 			"0", "0", "1";
 	};
+
+	af8133j: compass@1c {
+		compatible = "voltafield,af8133j";
+		reg = <0x1c>;
+		reset-gpios = <&gpio1 RK_PA1 GPIO_ACTIVE_LOW>;
+		avdd-supply = <&vcc_3v0>;
+		dvdd-supply = <&vcc_1v8>;
+	};
 };
 
 &i2s0 {
