@@ -975,7 +975,7 @@
 				<0 0 0 4 &pcie_intc 3>;
 		linux,pci-domain = <0>;
 		num-ib-windows = <6>;
-		num-ob-windows = <2>;
+		num-ob-windows = <8>;
 		max-link-speed = <2>;
 		msi-map = <0x0 &gic 0x0 0x1000>;
 		num-lanes = <1>;
