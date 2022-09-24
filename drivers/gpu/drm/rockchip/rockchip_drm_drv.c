@@ -201,6 +201,7 @@ err_unbind_all:
 	component_unbind_all(dev, drm_dev);
 err_free:
 	drm_dev_put(drm_dev);
+	dev_set_drvdata(dev, NULL);
 	return ret;
 }
 
@@ -217,6 +218,7 @@ static void rockchip_drm_unbind(struct device *dev)
 	rockchip_iommu_cleanup(drm_dev);
 
 	drm_dev_put(drm_dev);
+	dev_set_drvdata(dev, NULL);
 }
 
 DEFINE_DRM_GEM_FOPS(rockchip_drm_driver_fops);
