@@ -171,7 +171,7 @@ out_assert_reset:
 
 static void af8133j_power_down(struct af8133j_data *data)
 {
-	struct device *dev = &data->client->dev;
+//	struct device *dev = &data->client->dev;
 
 	if (!data->powered)
 		return;
