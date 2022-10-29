@@ -371,6 +371,11 @@ static int ppkb_probe(struct i2c_client *client)
 	ret = i2c_smbus_read_i2c_block_data(client, 0, sizeof(info), info);
 	if (ret != sizeof(info)) {
 		error = ret < 0 ? ret : -EIO;
+		if (error == -ENXIO) {
+			dev_info(dev, "Keyboard was not found on the I2C bus, maybe it's disconnected.\n");
+			return error;
+		}
+
 		dev_err(dev, "Failed to read device ID: %d\n", error);
 		return error;
 	}
