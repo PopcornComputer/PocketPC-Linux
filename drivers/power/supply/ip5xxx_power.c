@@ -195,6 +195,8 @@ static const enum power_supply_property ip5xxx_battery_properties[] = {
 	POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT_MAX,
 	POWER_SUPPLY_PROP_CONSTANT_CHARGE_VOLTAGE,
 	POWER_SUPPLY_PROP_CONSTANT_CHARGE_VOLTAGE_MAX,
+	POWER_SUPPLY_PROP_ENERGY_FULL_DESIGN,
+	POWER_SUPPLY_PROP_ENERGY_EMPTY_DESIGN,
 };
 
 static int ip5xxx_battery_get_status(struct ip5xxx *ip5xxx, int *val)
@@ -399,6 +401,14 @@ static int ip5xxx_battery_get_property(struct power_supply *psy,
 					      IP5XXX_BATIADC_DAT1, &raw);
 
 		val->intval = DIV_ROUND_CLOSEST(raw * 149197, 200);
+		return 0;
+
+	case POWER_SUPPLY_PROP_ENERGY_FULL_DESIGN:
+		val->intval = ip5xxx->bat->energy_full_design_uwh;
+		return 0;
+
+	case POWER_SUPPLY_PROP_ENERGY_EMPTY_DESIGN:
+		val->intval = 0;
 		return 0;
 
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:
