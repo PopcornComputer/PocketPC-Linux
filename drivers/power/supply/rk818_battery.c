@@ -3021,6 +3021,7 @@ static void rk818_bat_set_shtd_vol(struct rk818_battery *di)
 {
 	u8 val;
 
+#if 0
 	/* set vbat lowest 3.0v shutdown */
 	val = rk818_bat_read(di, RK818_VB_MON_REG);
 	val &= ~(VBAT_LOW_VOL_MASK | VBAT_LOW_ACT_MASK);
@@ -3030,6 +3031,13 @@ static void rk818_bat_set_shtd_vol(struct rk818_battery *di)
 	/* disable low irq */
 	rk818_bat_set_bits(di, RK818_INT_STS_MSK_REG1,
 			   VB_LOW_INT_EN, VB_LOW_INT_EN);
+#endif
+
+	val = rk818_bat_read(di, RK818_VB_MON_REG);
+	val &= (~(VBAT_LOW_VOL_MASK | VBAT_LOW_ACT_MASK));
+	val |= (RK818_VBAT_LOW_3V4 | EN_VBAT_LOW_IRQ);
+	rk818_bat_write(di, RK818_VB_MON_REG, val);
+	rk818_bat_set_bits(di, RK818_INT_STS_MSK_REG1, VB_LOW_INT_EN, 0);
 }
 
 static void rk818_bat_init_fg(struct rk818_battery *di)
@@ -3430,12 +3438,7 @@ static int rk818_battery_resume(struct platform_device *dev)
 	rk818_bat_save_data(di);
 
 	/* set vbat lowest 3.0v shutdown */
-	val = rk818_bat_read(di, RK818_VB_MON_REG);
-	val &= ~(VBAT_LOW_VOL_MASK | VBAT_LOW_ACT_MASK);
-	val |= (RK818_VBAT_LOW_3V0 | EN_VABT_LOW_SHUT_DOWN);
-	rk818_bat_write(di, RK818_VB_MON_REG, val);
-	rk818_bat_set_bits(di, RK818_INT_STS_MSK_REG1,
-			   VB_LOW_INT_EN, VB_LOW_INT_EN);
+	rk818_bat_set_shtd_vol(di);
 
 	/* charge/lowpower lock: for battery work to update dsoc and rsoc */
 	// if ((di->sleep_chrg_online) ||
