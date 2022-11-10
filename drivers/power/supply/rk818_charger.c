@@ -518,6 +518,14 @@ static int rk818_charger_get_property(struct power_supply *psy,
 		val->intval = 3000000;
 		break;
 
+	case POWER_SUPPLY_PROP_ENERGY_FULL_DESIGN:
+		val->intval = 11400000;
+		return 0;
+
+	case POWER_SUPPLY_PROP_ENERGY_EMPTY_DESIGN:
+		val->intval = 0;
+		return 0;
+
 	default:
 		return -EINVAL;
 	}
@@ -583,6 +591,8 @@ static enum power_supply_property rk818_charger_props[] = {
 	POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT_MAX,
 	POWER_SUPPLY_PROP_CONSTANT_CHARGE_VOLTAGE_MAX,
 	POWER_SUPPLY_PROP_PRECHARGE_CURRENT,
+	POWER_SUPPLY_PROP_ENERGY_FULL_DESIGN,
+	POWER_SUPPLY_PROP_ENERGY_EMPTY_DESIGN,
 
 	// inherited from BSP battery driver
 	POWER_SUPPLY_PROP_CURRENT_NOW,
