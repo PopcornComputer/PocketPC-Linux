@@ -243,8 +243,8 @@ static int kbpwr_snaphost(struct kbpwr_dev *kbpwr, struct kbpwr_status* s)
 				 * Other properties should never fail to read,
 				 * so make that a fatal issue.
 				 */
-				dev_err(kbpwr->dev, "Can't read %s\n", props[i].name);
-				return -1;
+				dev_err(kbpwr->dev, "Can't read %s (%d)\n", props[i].name, ret);
+				return ret;
 			}
 		}
 
@@ -311,7 +311,7 @@ static int kbpwr_update(struct kbpwr_dev *kbpwr,
 		 */
 		ret = power_supply_set_property(props[i].psy, props[i].prop, &val);
 		if (ret) {
-			dev_warn(kbpwr->dev, "Can't write %s\n", props[i].name);
+			dev_warn(kbpwr->dev, "Can't write %s (%d)\n", props[i].name, ret);
 			continue;
 		}
 
