@@ -847,7 +847,8 @@ static int kbpwr_probe(struct platform_device *pdev)
 
 	dev_info(dev, "Pinephone keyboard power manager ready\n");
 
-	set_bit(KBPWR_F_EMERGENCY_SHUTDOWN, kbpwr->flags);
+	//set_bit(KBPWR_F_EMERGENCY_SHUTDOWN, kbpwr->flags);
+	set_bit(KBPWR_F_DISABLED, kbpwr->flags);
 
 	queue_delayed_work(kbpwr->wq, &kbpwr->work, msecs_to_jiffies(10000));
 
