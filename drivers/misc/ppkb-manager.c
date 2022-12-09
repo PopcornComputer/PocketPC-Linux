@@ -5,7 +5,7 @@
  * Ondrej Jirman <megi@xff.cz>
  */
 
-#define DEBUG
+//#define DEBUG
 
 #include <linux/wait.h>
 #include <linux/device.h>
