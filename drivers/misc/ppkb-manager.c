@@ -31,7 +31,6 @@
 enum {
 	KBPWR_F_DISABLED,
 	KBPWR_F_EMERGENCY_SHUTDOWN,
-	KBPWR_F_BLOCKED,
 };
 
 enum {
@@ -338,7 +337,6 @@ static int kbpwr_handle_critical(struct kbpwr_dev *kbpwr)
 			  "critically low capacity reached\n");
 
 		//hw_protection_shutdown("Critical capacity", 30000);
-		//set_bit(KBPWR_F_BLOCKED, kbpwr->flags);
 		return true;
 	}
 
@@ -353,8 +351,6 @@ static void kbpwr_work(struct work_struct *work)
 	int ret;
 
 	if (test_bit(KBPWR_F_DISABLED, kbpwr->flags))
-		return;
-	if (test_bit(KBPWR_F_BLOCKED, kbpwr->flags))
 		return;
 
 	mutex_lock(&kbpwr->lock);
@@ -761,8 +757,6 @@ static int kbpwr_status_show(struct seq_file *s, void *data)
 
 	seq_printf(s, "\t\"disabled\": %s,\n",
 		   test_bit(KBPWR_F_DISABLED, kbpwr->flags) ? "true" : "false");
-	seq_printf(s, "\t\"blocked\": %s,\n",
-		   test_bit(KBPWR_F_BLOCKED, kbpwr->flags) ? "true" : "false");
 	seq_printf(s, "\t\"emergency_shutdown_enable\": %s,\n",
 		   test_bit(KBPWR_F_EMERGENCY_SHUTDOWN, kbpwr->flags) ? "true" : "false");
 
@@ -854,8 +848,6 @@ static int kbpwr_probe(struct platform_device *pdev)
 	dev_info(dev, "Pinephone keyboard power manager ready\n");
 
 	set_bit(KBPWR_F_EMERGENCY_SHUTDOWN, kbpwr->flags);
-	if (of_property_read_bool(np, "blocked"))
-		set_bit(KBPWR_F_BLOCKED, kbpwr->flags);
 
 	queue_delayed_work(kbpwr->wq, &kbpwr->work, msecs_to_jiffies(10000));
 
