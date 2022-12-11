@@ -2930,7 +2930,6 @@ static irqreturn_t rk818_vb_low_irq(int irq, void *bat)
 {
 	struct rk818_battery *di = (struct rk818_battery *)bat;
 
-	di->dsoc = 0;
 	rk_send_wakeup_key();
 	BAT_INFO("lower power yet, power off system! v=%d, c=%d, dsoc=%d\n",
 		 di->voltage_avg, di->current_avg, di->dsoc);
