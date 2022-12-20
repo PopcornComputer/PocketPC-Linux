@@ -956,6 +956,7 @@
 		reset-gpios = <&gpio1 RK_PA0 GPIO_ACTIVE_LOW>;
 		powerdown-gpios = <&gpio2 RK_PD4 GPIO_ACTIVE_HIGH>;
 
+		orientation = <1>;
 		rotation = <270>;
 
 		lens-focus = <&wcam_lens>;
@@ -996,6 +997,7 @@
 		rockchip,camera-module-name = "CameraKing";
 		rockchip,camera-module-lens-name = "Largan-9569A2";
 
+		orientation = <0>;
 		rotation = <90>;
 
 		port {
