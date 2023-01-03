@@ -722,13 +722,43 @@ static int sun6i_csi_capture_enum_fmt(struct file *file, void *private,
 				      struct v4l2_fmtdesc *fmtdesc)
 {
 	u32 index = fmtdesc->index;
+	unsigned int i;
 
 	if (index >= ARRAY_SIZE(sun6i_csi_capture_formats))
 		return -EINVAL;
 
-	fmtdesc->pixelformat = sun6i_csi_capture_formats[index].pixelformat;
+	for (i = 0; i < ARRAY_SIZE(sun6i_csi_capture_formats); i++) {
+		const struct sun6i_csi_capture_format *format =
+			&sun6i_csi_capture_formats[i];
 
-	return 0;
+		/*
+		 * If a media bus code is specified, only consider formats that
+		 * match it.
+		 */
+		if (fmtdesc->mbus_code) {
+			unsigned int j;
+
+			if (!format->mbus_codes)
+				continue;
+
+			for (j = 0; format->mbus_codes[j]; j++) {
+				if (fmtdesc->mbus_code == format->mbus_codes[j])
+					break;
+			}
+
+			if (!format->mbus_codes[j])
+				continue;
+		}
+
+		if (index == 0) {
+			fmtdesc->pixelformat = format->pixelformat;
+			return 0;
+		}
+
+		index--;
+	}
+
+	return -EINVAL;
 }
 
 static int sun6i_csi_capture_g_fmt(struct file *file, void *private,
@@ -1034,7 +1064,8 @@ int sun6i_csi_capture_setup(struct sun6i_csi_device *csi_dev)
 
 	strscpy(video_dev->name, SUN6I_CSI_CAPTURE_NAME,
 		sizeof(video_dev->name));
-	video_dev->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING;
+	video_dev->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING
+				| V4L2_CAP_IO_MC;
 	video_dev->vfl_dir = VFL_DIR_RX;
 	video_dev->release = video_device_release_empty;
 	video_dev->fops = &sun6i_csi_capture_fops;
