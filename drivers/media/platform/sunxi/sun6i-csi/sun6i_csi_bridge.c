@@ -15,17 +15,8 @@
 
 /* Helpers */
 
-void sun6i_csi_bridge_dimensions(struct sun6i_csi_device *csi_dev,
-				 unsigned int *width, unsigned int *height)
-{
-	if (width)
-		*width = csi_dev->bridge.mbus_format.width;
-	if (height)
-		*height = csi_dev->bridge.mbus_format.height;
-}
-
-void sun6i_csi_bridge_format(struct sun6i_csi_device *csi_dev,
-			     u32 *mbus_code, u32 *field)
+static void sun6i_csi_bridge_format(struct sun6i_csi_device *csi_dev,
+				    u32 *mbus_code, u32 *field)
 {
 	if (mbus_code)
 		*mbus_code = csi_dev->bridge.mbus_format.code;
