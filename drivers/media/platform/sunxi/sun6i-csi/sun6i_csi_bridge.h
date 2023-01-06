@@ -38,12 +38,14 @@ struct sun6i_csi_bridge_async_subdev {
 	struct sun6i_csi_bridge_source	*source;
 };
 
+#define SUN6I_CSI_SOURCE_PARALLEL_MAX 2
+
 struct sun6i_csi_bridge {
 	struct v4l2_subdev		subdev;
 	struct v4l2_async_notifier	notifier;
 	struct media_pad		pads[2];
 
-	struct sun6i_csi_bridge_source	source_parallel;
+	struct sun6i_csi_bridge_source	source_parallel[SUN6I_CSI_SOURCE_PARALLEL_MAX];
 	struct sun6i_csi_bridge_source	source_mipi_csi2;
 };
 

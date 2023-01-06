@@ -207,12 +207,12 @@ static void sun6i_csi_bridge_disable(struct sun6i_csi_device *csi_dev)
 
 static void
 sun6i_csi_bridge_configure_parallel(struct sun6i_csi_device *csi_dev,
-				    struct v4l2_subdev_state *state)
+				    struct v4l2_subdev_state *state,
+				    struct sun6i_csi_bridge_source *source)
 {
 	struct device *dev = csi_dev->dev;
 	struct regmap *regmap = csi_dev->regmap;
-	struct v4l2_fwnode_endpoint *endpoint =
-		&csi_dev->bridge.source_parallel.endpoint;
+	struct v4l2_fwnode_endpoint *endpoint = &source->endpoint;
 	unsigned char bus_width = endpoint->bus.parallel.bus_width;
 	unsigned int flags = endpoint->bus.parallel.flags;
 	const struct v4l2_mbus_framefmt *sink_format;
@@ -380,10 +380,8 @@ static void sun6i_csi_bridge_configure(struct sun6i_csi_device *csi_dev,
 				       struct sun6i_csi_bridge_source *source,
 				       struct v4l2_subdev_state *state)
 {
-	struct sun6i_csi_bridge *bridge = &csi_dev->bridge;
-
-	if (source == &bridge->source_parallel)
-		sun6i_csi_bridge_configure_parallel(csi_dev, state);
+	if (source->endpoint.bus_type == V4L2_MBUS_PARALLEL)
+		sun6i_csi_bridge_configure_parallel(csi_dev, state, source);
 	else
 		sun6i_csi_bridge_configure_mipi_csi2(csi_dev, state);
 
@@ -399,11 +397,11 @@ static int sun6i_csi_bridge_s_stream(struct v4l2_subdev *subdev, int on)
 	struct media_pad *local_pad = &bridge->pads[SUN6I_CSI_BRIDGE_PAD_SINK];
 	bool capture_streaming = csi_dev->capture.state.streaming;
 	struct device *dev = csi_dev->dev;
-	struct sun6i_csi_bridge_source *source;
+	struct sun6i_csi_bridge_source *source = NULL;
 	struct v4l2_subdev *source_subdev;
 	struct media_pad *remote_pad;
 	struct v4l2_subdev_state *state;
-	int ret;
+	int ret, i;
 
 	/* Source */
 
@@ -416,10 +414,20 @@ static int sun6i_csi_bridge_s_stream(struct v4l2_subdev *subdev, int on)
 
 	source_subdev = media_entity_to_v4l2_subdev(remote_pad->entity);
 
-	if (source_subdev == bridge->source_parallel.subdev)
-		source = &bridge->source_parallel;
-	else
+	if (source_subdev == bridge->source_mipi_csi2.subdev) {
 		source = &bridge->source_mipi_csi2;
+	} else {
+		for (i = 0; i < SUN6I_CSI_SOURCE_PARALLEL_MAX; i++) {
+			if (source_subdev == bridge->source_parallel[i].subdev) {
+				source = &bridge->source_parallel[i];
+				break;
+			}
+		}
+	}
+	if (!source) {
+		dev_err(dev, "bridge source not found\n");
+		return -ENODEV;
+	}
 
 	if (!on) {
 		v4l2_subdev_call(source_subdev, video, s_stream, 0);
@@ -635,10 +643,10 @@ sun6i_csi_bridge_notifier_bound(struct v4l2_async_notifier *notifier,
 
 	switch (source->endpoint.base.port) {
 	case SUN6I_CSI_PORT_PARALLEL:
-		enabled = true;
+		enabled = source->endpoint.base.id == 0;
 		break;
 	case SUN6I_CSI_PORT_MIPI_CSI2:
-		enabled = !bridge->source_parallel.expected;
+		enabled = !bridge->source_parallel[0].expected;
 		break;
 	default:
 		return -EINVAL;
@@ -684,7 +692,7 @@ sun6i_csi_bridge_notifier_ops = {
 
 static int sun6i_csi_bridge_source_setup(struct sun6i_csi_device *csi_dev,
 					 struct sun6i_csi_bridge_source *source,
-					 u32 port,
+					 u32 port, u32 ep,
 					 enum v4l2_mbus_type *bus_types)
 {
 	struct device *dev = csi_dev->dev;
@@ -694,7 +702,7 @@ static int sun6i_csi_bridge_source_setup(struct sun6i_csi_device *csi_dev,
 	struct fwnode_handle *handle;
 	int ret;
 
-	handle = fwnode_graph_get_endpoint_by_id(dev_fwnode(dev), port, 0, 0);
+	handle = fwnode_graph_get_endpoint_by_id(dev_fwnode(dev), port, ep, 0);
 	if (!handle)
 		return -ENODEV;
 
@@ -753,7 +761,7 @@ int sun6i_csi_bridge_setup(struct sun6i_csi_device *csi_dev)
 		V4L2_MBUS_BT656,
 		V4L2_MBUS_INVALID
 	};
-	int ret;
+	int ret, i;
 
 	/* V4L2 Subdev */
 
@@ -801,11 +809,12 @@ int sun6i_csi_bridge_setup(struct sun6i_csi_device *csi_dev)
 	v4l2_async_nf_init(notifier);
 	notifier->ops = &sun6i_csi_bridge_notifier_ops;
 
-	sun6i_csi_bridge_source_setup(csi_dev, &bridge->source_parallel,
-				      SUN6I_CSI_PORT_PARALLEL,
-				      parallel_mbus_types);
+	for (i = 0; i < SUN6I_CSI_SOURCE_PARALLEL_MAX; i++)
+		sun6i_csi_bridge_source_setup(csi_dev, &bridge->source_parallel[i],
+					      SUN6I_CSI_PORT_PARALLEL, i,
+					      parallel_mbus_types);
 	sun6i_csi_bridge_source_setup(csi_dev, &bridge->source_mipi_csi2,
-				      SUN6I_CSI_PORT_MIPI_CSI2, NULL);
+				      SUN6I_CSI_PORT_MIPI_CSI2, 0, NULL);
 
 	if (csi_dev->isp_available)
 		ret = v4l2_async_subdev_nf_register(subdev, notifier);
