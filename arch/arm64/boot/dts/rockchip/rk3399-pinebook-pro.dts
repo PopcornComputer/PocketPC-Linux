@@ -723,7 +723,7 @@
 			altmodes {
 				dp {
 					svid = <0xff01>;
-					vdo = <0x0c0046>;
+					vdo = <0x0c46>;
 				};
 			};
 
