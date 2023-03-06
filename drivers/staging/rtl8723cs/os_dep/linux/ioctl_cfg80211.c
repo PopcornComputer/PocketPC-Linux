@@ -452,14 +452,14 @@ u8 rtw_cfg80211_ch_switch_notify(_adapter *adapter, u8 ch, u8 bw, u8 offset,
 		goto exit;
 
 	if (started) {
-		cfg80211_ch_switch_started_notify(adapter->pnetdev, &chdef, 0, 0, false);
+		cfg80211_ch_switch_started_notify(adapter->pnetdev, &chdef, 0, 0, false, 0);
 		goto exit;
 	}
 
 	if (!rtw_cfg80211_allow_ch_switch_notify(adapter))
 		goto exit;
 
-	cfg80211_ch_switch_notify(adapter->pnetdev, &chdef, 0);
+	cfg80211_ch_switch_notify(adapter->pnetdev, &chdef, 0, 0);
 
 exit:
 	return ret;
