@@ -2500,6 +2500,7 @@ static void ov5640_powerup_sequence(struct ov5640_dev *sensor)
 static int ov5640_set_power_on(struct ov5640_dev *sensor)
 {
 	struct i2c_client *client = sensor->i2c_client;
+	u16 chip_id;
 	int ret;
 
 	ret = clk_prepare_enable(sensor->xclk);
@@ -2522,6 +2523,13 @@ static int ov5640_set_power_on(struct ov5640_dev *sensor)
 	ret = ov5640_init_slave_id(sensor);
 	if (ret)
 		goto power_off;
+
+	ret = ov5640_read_reg16(sensor, OV5640_REG_CHIP_ID, &chip_id);
+	if (ret) {
+		dev_err(&client->dev, "%s: failed to read chip identifier\n",
+			__func__);
+		goto power_off;
+	}
 
 	return 0;
 
@@ -3832,28 +3840,6 @@ static int ov5640_get_regulators(struct ov5640_dev *sensor)
 				       sensor->supplies);
 }
 
-static int ov5640_check_chip_id(struct ov5640_dev *sensor)
-{
-	struct i2c_client *client = sensor->i2c_client;
-	int ret = 0;
-	u16 chip_id;
-
-	ret = ov5640_read_reg16(sensor, OV5640_REG_CHIP_ID, &chip_id);
-	if (ret) {
-		dev_err(&client->dev, "%s: failed to read chip identifier\n",
-			__func__);
-		return ret;
-	}
-
-	if (chip_id != 0x5640) {
-		dev_err(&client->dev, "%s: wrong chip identifier, expected 0x5640, got 0x%x\n",
-			__func__, chip_id);
-		return -ENXIO;
-	}
-
-	return 0;
-}
-
 static int ov5640_probe(struct i2c_client *client)
 {
 	struct device *dev = &client->dev;
@@ -3953,36 +3939,18 @@ static int ov5640_probe(struct i2c_client *client)
 	if (ret)
 		goto entity_cleanup;
 
-	ret = ov5640_sensor_resume(dev);
-	if (ret) {
-		dev_err(dev, "failed to power on\n");
-		goto entity_cleanup;
-	}
-
-	pm_runtime_set_active(dev);
-	pm_runtime_get_noresume(dev);
-	pm_runtime_enable(dev);
-
-	ret = ov5640_check_chip_id(sensor);
-	if (ret)
-		goto err_pm_runtime;
-
 	ret = v4l2_async_register_subdev_sensor(&sensor->sd);
 	if (ret)
-		goto err_pm_runtime;
+		goto err_controls;
 
+	pm_runtime_enable(dev);
 	pm_runtime_set_autosuspend_delay(dev, 1000);
 	pm_runtime_use_autosuspend(dev);
-	pm_runtime_mark_last_busy(dev);
-	pm_runtime_put_autosuspend(dev);
 
 	return 0;
 
-err_pm_runtime:
-	pm_runtime_put_noidle(dev);
-	pm_runtime_disable(dev);
+err_controls:
 	v4l2_ctrl_handler_free(&sensor->ctrls.handler);
-	ov5640_sensor_suspend(dev);
 entity_cleanup:
 	media_entity_cleanup(&sensor->sd.entity);
 	mutex_destroy(&sensor->lock);
@@ -3994,6 +3962,8 @@ static void ov5640_remove(struct i2c_client *client)
 	struct v4l2_subdev *sd = i2c_get_clientdata(client);
 	struct ov5640_dev *sensor = to_ov5640_dev(sd);
 	struct device *dev = &client->dev;
+
+	pm_runtime_dont_use_autosuspend(dev);
 
 	pm_runtime_disable(dev);
 	if (!pm_runtime_status_suspended(dev))
