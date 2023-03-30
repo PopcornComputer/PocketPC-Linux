@@ -191,9 +191,12 @@ struct rtw_wdev_priv {
 #endif
 
 #ifdef CONFIG_RTW_CFGVENDOR_RSSIMONITOR
-        s8 rssi_monitor_max;
-        s8 rssi_monitor_min;
-        u8 rssi_monitor_enable;
+        s32 rssi_monitor_th;
+        u32 rssi_monitor_hyst;
+        s32 rssi_monitor_state; //  0 = midpoint
+				// -1 = last crossed low threshold
+				//  1 = last crossed high threshold
+        bool rssi_monitor_enable;
 #endif
 
 };

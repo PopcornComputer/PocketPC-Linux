@@ -3405,7 +3405,7 @@ bypass_p2p_chk:
 	    && rtw_mi_busy_traffic_check(padapter)) {
 		RTW_WARN(FUNC_ADPT_FMT ": scan abort!! BusyTraffic\n",
 			 FUNC_ADPT_ARG(padapter));
- 		need_indicate_scan_done = _TRUE;
+		need_indicate_scan_done = _TRUE;
 		goto check_need_indicate_scan_done;
 	}
 #endif /* RTW_BUSY_DENY_SCAN */
@@ -3518,14 +3518,15 @@ static void cfg80211_rtw_abort_scan(struct wiphy *wiphy,
 
 static int cfg80211_rtw_set_cqm_rssi_config(struct wiphy *wiphy,
                                             struct net_device *dev,
-	                               	    s32 rssi_thold,
-				            u32 rssi_hyst)
+					    s32 rssi_thold,
+					    u32 rssi_hyst)
 {
 	_adapter *padapter = GET_PRIMARY_ADAPTER(wiphy_to_adapter(wiphy));
         struct rtw_wdev_priv *pwdev_priv = adapter_wdev_data(padapter);
 
-	pwdev_priv->rssi_monitor_max = 0;
-	pwdev_priv->rssi_monitor_min = rssi_thold;
+	pwdev_priv->rssi_monitor_th = rssi_thold;
+	pwdev_priv->rssi_monitor_hyst = rssi_hyst;
+	pwdev_priv->rssi_monitor_state = 1;
         pwdev_priv->rssi_monitor_enable = 1;
         RTW_INFO("%s, rssi_thold=%d, rssi_hyst=%d\n", __func__, rssi_thold, rssi_hyst);
         return 0;
@@ -10599,11 +10600,11 @@ int rtw_wdev_alloc(_adapter *padapter, struct wiphy *wiphy)
 #endif
 
 #ifdef CONFIG_RTW_CFGVENDOR_RSSIMONITOR
+	pwdev_priv->rssi_monitor_th = 0;
+	pwdev_priv->rssi_monitor_hyst = 0;
+	pwdev_priv->rssi_monitor_state = 1;
         pwdev_priv->rssi_monitor_enable = 0;
-        pwdev_priv->rssi_monitor_max = 0;
-        pwdev_priv->rssi_monitor_min = 0;
 #endif
-
 
 exit:
 	return ret;
