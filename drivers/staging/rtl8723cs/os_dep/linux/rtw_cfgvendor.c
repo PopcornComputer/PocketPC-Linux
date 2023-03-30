@@ -36,6 +36,7 @@
 */
 
 #include <net/rtnetlink.h>
+#include "rtw_cfgvendor.h"
 
 #ifndef MIN
 #define MIN(x,y) (((x) < (y)) ? (x) : (y))
@@ -1345,14 +1346,48 @@ void rtw_cfgvendor_rssi_monitor_evt(_adapter *padapter) {
 	struct sk_buff *skb;
 	u32 tot_len = NLMSG_DEFAULT_SIZE;
 	gfp_t kflags;
+#ifndef CONFIG_RTW_CFGVENDOR_CQM_THRESHOLD_EVT_LOW
         rssi_monitor_evt data ;
+#endif
         s8 rssi = precvpriv->rssi;
 
         if (pwdev_priv->rssi_monitor_enable == 0 || check_fwstate(pmlmepriv, WIFI_ASOC_STATE) != _TRUE)
                 return;
 
-        if (rssi < pwdev_priv->rssi_monitor_max || rssi > pwdev_priv->rssi_monitor_min)
+	#ifdef CONFIG_RTW_CFGVENDOR_CQM_THRESHOLD_EVT_LOW
+        /* Updated this function to return NL80211_CQM_RSSI_THRESHOLD_EVENT_LOW, which is the
+           type of event expected by wpa_supplicant when the rssi value drops below threshold.
+           This type of event triggers a scan, and is generally followed by a roam to an AP
+           with stronger signal. */
+        if (rssi < pwdev_priv->rssi_monitor_max && rssi > pwdev_priv->rssi_monitor_min)
                 return;
+
+	kflags = in_atomic() ? GFP_ATOMIC : GFP_KERNEL;
+
+	cfg80211_cqm_rssi_notify(wdev->netdev, NL80211_CQM_RSSI_THRESHOLD_EVENT_LOW, rssi, kflags);
+
+	/* After a cqm rssi threshold event, disable event triggering to:
+	     1. prevent constant event generation.
+	     2. allow the wpa_supplicant to drive this process based on its bgscan interval settings. */
+	pwdev_priv->rssi_monitor_enable = 0;
+
+	return;
+
+        #else
+	/* The original code calls rtw_cfg80211_vendor_event_alloc() to allocate an skb to
+           send a "vendor event" to user space.  The third value passed to
+           rtw_cfg80211_vendor_event_alloc() should be "event_idx: index of the vendor event
+           in the wiphy's vendor_events", but rather than passing the index of the vendor event
+           in the vendor_events array, the code incorrectly passes the enum value 13 of the
+           GOOGLE_RSSI_MONITOR_EVENT vendor event.  This value is larger than the size of the
+           vendor_events array and results in a return value of NULL rather than the address of
+           an allocated skb buffer.  Since the skb is not allocated,  no vendor event is actually
+           reported.  Modifying this code to send the proper index of the vendor_event does not
+           improve things, since this vendor defined event type is not handled by wpa_supplicant
+           anyway. */ 
+
+        if (rssi < pwdev_priv->rssi_monitor_max || rssi > pwdev_priv->rssi_monitor_min)
+               return;
 
 	kflags = in_atomic() ? GFP_ATOMIC : GFP_KERNEL;
 
@@ -1373,6 +1408,8 @@ void rtw_cfgvendor_rssi_monitor_evt(_adapter *padapter) {
 	rtw_cfg80211_vendor_event(skb, kflags);
 exit:
 	return;
+
+        #endif /* original code */
 }
 #endif /* CONFIG_RTW_CFGVENDOR_RSSIMONITR */
 

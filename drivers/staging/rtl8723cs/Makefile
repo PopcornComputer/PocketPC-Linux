@@ -22,6 +22,7 @@ EXTRA_CFLAGS += -Wno-date-time	# Fix compile error && warning on gcc 4.9 and lat
 endif
 
 EXTRA_CFLAGS += -I$(srctree)/$(src)/include
+EXTRA_CFLAGS += -DCONFIG_RTW_CFGVENDOR_RSSIMONITOR -DCONFIG_RTW_CFGVENDOR_CQM_THRESHOLD_EVT_LOW
 
 EXTRA_LDFLAGS += --strip-debug
 

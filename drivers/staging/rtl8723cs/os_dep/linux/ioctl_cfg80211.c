@@ -3516,6 +3516,21 @@ static void cfg80211_rtw_abort_scan(struct wiphy *wiphy,
 }
 #endif
 
+static int cfg80211_rtw_set_cqm_rssi_config(struct wiphy *wiphy,
+                                            struct net_device *dev,
+	                               	    s32 rssi_thold,
+				            u32 rssi_hyst)
+{
+	_adapter *padapter = GET_PRIMARY_ADAPTER(wiphy_to_adapter(wiphy));
+        struct rtw_wdev_priv *pwdev_priv = adapter_wdev_data(padapter);
+
+	pwdev_priv->rssi_monitor_max = 0;
+	pwdev_priv->rssi_monitor_min = rssi_thold;
+        pwdev_priv->rssi_monitor_enable = 1;
+        RTW_INFO("%s, rssi_thold=%d, rssi_hyst=%d\n", __func__, rssi_thold, rssi_hyst);
+        return 0;
+}
+
 static int cfg80211_rtw_set_wiphy_params(struct wiphy *wiphy, u32 changed)
 {
 #if 0
@@ -10447,6 +10462,9 @@ static struct cfg80211_ops rtw_cfg80211_ops = {
 #if (KERNEL_VERSION(4, 17, 0) <= LINUX_VERSION_CODE) \
     || defined(CONFIG_KERNEL_PATCH_EXTERNAL_AUTH)
 	.external_auth = cfg80211_rtw_external_auth,
+#endif
+#ifdef CONFIG_RTW_CFGVENDOR_RSSIMONITOR
+        .set_cqm_rssi_config = cfg80211_rtw_set_cqm_rssi_config,
 #endif
 };
 
