@@ -429,6 +429,10 @@ static const struct snd_kcontrol_new rt5640_snd_controls[] = {
 	SOC_SINGLE_TLV("RECMIXR BST1 Gain", RT5640_REC_R2_MIXER, 13, 6, 1, rec_gain_tlv),
 	SOC_SINGLE_TLV("RECMIXR OUTMIXR Gain", RT5640_REC_R2_MIXER, 10, 6, 1, rec_gain_tlv),
 
+	SOC_SINGLE("IN3 Differential Mode", RT5640_IN1_IN2, 6, 1, 0),
+	SOC_SINGLE("IN2 Differential Mode", RT5640_IN3_IN4, 6, 1, 0),
+	SOC_SINGLE("LOUT Differential Mode", 0xfa, 14, 1, 0),
+
 	/* INL/INR Volume Control */
 	SOC_DOUBLE_TLV("IN Capture Volume", RT5640_INL_INR_VOL,
 			RT5640_INL_VOL_SFT, RT5640_INR_VOL_SFT,
