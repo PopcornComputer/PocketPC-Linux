@@ -781,6 +781,7 @@ static int dwc3_phy_power_on(struct dwc3 *dwc)
 	if (ret < 0)
 		goto err_power_off_usb2_phy;
 
+	dwc->usb3_phy_powered = true;
 	return 0;
 
 err_power_off_usb2_phy:
@@ -794,7 +795,10 @@ err_suspend_usb3_phy:
 
 static void dwc3_phy_power_off(struct dwc3 *dwc)
 {
-	phy_power_off(dwc->usb3_generic_phy);
+	if (dwc->usb3_phy_powered)
+		phy_power_off(dwc->usb3_generic_phy);
+	dwc->usb3_phy_powered = false;
+
 	phy_power_off(dwc->usb2_generic_phy);
 
 	usb_phy_set_suspend(dwc->usb3_phy, 1);

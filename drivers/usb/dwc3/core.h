@@ -1165,6 +1165,7 @@ struct dwc3 {
 
 	struct phy		*usb2_generic_phy;
 	struct phy		*usb3_generic_phy;
+	bool			usb3_phy_powered;
 
 	bool			phys_ready;
 
