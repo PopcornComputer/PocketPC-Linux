@@ -160,7 +160,9 @@ static const char * const anx7688_supply_names[] = {
         "dvdd18",
         "avdd10",
         "dvdd10",
-        "i2c",
+	//XXX: this would block I2C power supply from being disabled during suspend
+	//by other drivers, so let's not enable I2C power in this driver.
+	//"i2c",
         "hdmi_vt",
 
         "vconn", // power for VCONN1/VCONN2 switches
