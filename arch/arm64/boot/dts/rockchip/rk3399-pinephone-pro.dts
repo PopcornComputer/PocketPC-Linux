@@ -848,6 +848,7 @@
 		pinctrl-0 = <&stk3311_int>;
 		vdd-supply = <&vcc_3v0>;
 		leda-supply = <&vcc_3v0>;
+		i2c-supply = <&vcc3v0_touch>;
 	};
 };
 
