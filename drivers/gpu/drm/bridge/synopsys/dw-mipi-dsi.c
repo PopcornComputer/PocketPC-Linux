@@ -853,6 +853,8 @@ static void dw_mipi_dsi_bridge_post_atomic_disable(struct drm_bridge *bridge,
 	struct dw_mipi_dsi *dsi = bridge_to_dsi(bridge);
 	const struct dw_mipi_dsi_phy_ops *phy_ops = dsi->plat_data->phy_ops;
 
+	dev_info(dsi->dev, "post_disable\n");
+
 	/*
 	 * Switch to command mode before panel-bridge post_disable &
 	 * panel unprepare.
@@ -940,6 +942,8 @@ static void dw_mipi_dsi_bridge_atomic_pre_enable(struct drm_bridge *bridge,
 {
 	struct dw_mipi_dsi *dsi = bridge_to_dsi(bridge);
 
+	dev_info(dsi->dev, "pre_enable\n");
+
 	/* Power up the dsi ctl into a command mode */
 	dw_mipi_dsi_mode_set(dsi, &dsi->mode);
 	if (dsi->slave)
@@ -952,6 +956,8 @@ static void dw_mipi_dsi_bridge_mode_set(struct drm_bridge *bridge,
 {
 	struct dw_mipi_dsi *dsi = bridge_to_dsi(bridge);
 
+	dev_info(dsi->dev, "mode_set\n");
+
 	/* Store the display mode for later use in pre_enable callback */
 	drm_mode_copy(&dsi->mode, adjusted_mode);
 }
@@ -960,6 +966,8 @@ static void dw_mipi_dsi_bridge_atomic_enable(struct drm_bridge *bridge,
 					     struct drm_bridge_state *old_bridge_state)
 {
 	struct dw_mipi_dsi *dsi = bridge_to_dsi(bridge);
+
+	dev_info(dsi->dev, "enable\n");
 
 	/* Switch to video mode for panel-bridge enable & panel enable */
 	dw_mipi_dsi_set_mode(dsi, MIPI_DSI_MODE_VIDEO);
