@@ -529,6 +529,12 @@ static int rk808_power_off(struct sys_off_data *data)
 		reg = RK805_DEV_CTRL_REG;
 		bit = DEV_OFF;
 		break;
+	case RK806_ID:
+		ret = regmap_write(rk808->regmap, RK806_SYS_CFG3, RK806_DEV_OFF);
+		if (ret)
+			dev_err(rk808->dev, "Failed to shutdown device!\n");
+
+		return NOTIFY_DONE;
 	case RK808_ID:
 		reg = RK808_DEVCTRL_REG,
 		bit = DEV_OFF_RST;

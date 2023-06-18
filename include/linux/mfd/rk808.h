@@ -634,6 +634,8 @@ enum rk805_reg {
 #define RK806_CMD_LEN_MSK		0x0f
 #define RK806_REG_H			0x00
 
+#define RK806_DEV_OFF			0x01
+
 #define VERSION_AB		0x01
 
 enum rk806_reg_id {
