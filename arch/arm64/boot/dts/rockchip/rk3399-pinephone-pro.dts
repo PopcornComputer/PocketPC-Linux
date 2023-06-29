@@ -1482,11 +1482,14 @@
 
 &spi1 {
 	status = "okay";
+	assigned-clocks = <&cru SCLK_SPI1>;
+	assigned-clock-rates = <100000000>;
 
 	flash@0 {
 		compatible = "jedec,spi-nor";
 		reg = <0>;
-		spi-max-frequency = <10000000>;
+		spi-max-frequency = <50000000>;
+		m25p,fast-read;
 	};
 };
 
