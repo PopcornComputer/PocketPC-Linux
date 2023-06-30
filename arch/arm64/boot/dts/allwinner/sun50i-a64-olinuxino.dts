@@ -120,6 +120,10 @@
 	};
 };
 
+&i2s2 {
+	status = "okay";
+};
+
 &mdio {
 	ext_rgmii_phy: ethernet-phy@1 {
 		compatible = "ethernet-phy-ieee802.3-c22";
@@ -355,6 +359,9 @@
 		    "MIC1", "Microphone Jack Left",
 		    "Microphone Jack Right", "MBIAS",
 		    "MIC2", "Microphone Jack Right";
+};
+
+&sound_hdmi {
 	status = "okay";
 };
 
