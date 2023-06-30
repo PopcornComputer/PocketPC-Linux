@@ -81,6 +81,7 @@ struct goodix_ts_data {
 	const char *firmware_name;
 	struct touchscreen_properties prop;
 	unsigned int max_touch_num;
+	bool use_dt_irqflags;
 	unsigned int int_trigger_type;
 	struct regulator *avdd28;
 	struct regulator *vddio;

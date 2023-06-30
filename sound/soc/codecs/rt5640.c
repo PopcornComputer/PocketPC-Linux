@@ -344,6 +344,7 @@ static const DECLARE_TLV_DB_MINMAX(dac_vol_tlv, -6562, 0);
 static const DECLARE_TLV_DB_SCALE(in_vol_tlv, -3450, 150, 0);
 static const DECLARE_TLV_DB_MINMAX(adc_vol_tlv, -1762, 3000);
 static const DECLARE_TLV_DB_SCALE(adc_bst_tlv, 0, 1200, 0);
+static const DECLARE_TLV_DB_MINMAX(rec_gain_tlv, -1800, 0);
 
 /* {0, +20, +24, +30, +35, +40, +44, +50, +52} dB */
 static const DECLARE_TLV_DB_RANGE(bst_tlv,
@@ -414,6 +415,23 @@ static const struct snd_kcontrol_new rt5640_snd_controls[] = {
 		RT5640_BST_SFT2, 8, 0, bst_tlv),
 	SOC_SINGLE_TLV("IN3 Boost", RT5640_IN1_IN2,
 		RT5640_BST_SFT2, 8, 0, bst_tlv),
+
+	/* RECMIXL Gain Controls */
+	SOC_SINGLE_TLV("RECMIXL INL Gain", RT5640_REC_L1_MIXER, 10, 6, 1, rec_gain_tlv),
+	SOC_SINGLE_TLV("RECMIXL BST2 Gain", RT5640_REC_L1_MIXER, 7, 6, 1, rec_gain_tlv),
+	SOC_SINGLE_TLV("RECMIXL BST3 Gain", RT5640_REC_L1_MIXER, 1, 6, 1, rec_gain_tlv),
+	SOC_SINGLE_TLV("RECMIXL BST1 Gain", RT5640_REC_L2_MIXER, 13, 6, 1, rec_gain_tlv),
+	SOC_SINGLE_TLV("RECMIXL OUTMIXL Gain", RT5640_REC_L2_MIXER, 10, 6, 1, rec_gain_tlv),
+	
+	SOC_SINGLE_TLV("RECMIXR INR Gain", RT5640_REC_R1_MIXER, 10, 6, 1, rec_gain_tlv),
+	SOC_SINGLE_TLV("RECMIXR BST2 Gain", RT5640_REC_R1_MIXER, 7, 6, 1, rec_gain_tlv),
+	SOC_SINGLE_TLV("RECMIXR BST3 Gain", RT5640_REC_R1_MIXER, 1, 6, 1, rec_gain_tlv),
+	SOC_SINGLE_TLV("RECMIXR BST1 Gain", RT5640_REC_R2_MIXER, 13, 6, 1, rec_gain_tlv),
+	SOC_SINGLE_TLV("RECMIXR OUTMIXR Gain", RT5640_REC_R2_MIXER, 10, 6, 1, rec_gain_tlv),
+
+	SOC_SINGLE("IN3 Differential Mode", RT5640_IN1_IN2, 6, 1, 0),
+	SOC_SINGLE("IN2 Differential Mode", RT5640_IN3_IN4, 6, 1, 0),
+	SOC_SINGLE("LOUT Differential Mode", 0xfa, 14, 1, 0),
 
 	/* INL/INR Volume Control */
 	SOC_DOUBLE_TLV("IN Capture Volume", RT5640_INL_INR_VOL,
@@ -653,8 +671,8 @@ static const struct snd_kcontrol_new rt5640_spk_r_mix[] = {
 };
 
 static const struct snd_kcontrol_new rt5640_out_l_mix[] = {
-	SOC_DAPM_SINGLE("SPK MIXL Switch", RT5640_OUT_L3_MIXER,
-			RT5640_M_SM_L_OM_L_SFT, 1, 1),
+	SOC_DAPM_SINGLE("BST3 Switch", RT5640_OUT_L3_MIXER,
+			RT5640_M_BST3_OM_L_SFT, 1, 1),
 	SOC_DAPM_SINGLE("BST1 Switch", RT5640_OUT_L3_MIXER,
 			RT5640_M_BST1_OM_L_SFT, 1, 1),
 	SOC_DAPM_SINGLE("INL Switch", RT5640_OUT_L3_MIXER,
@@ -670,10 +688,10 @@ static const struct snd_kcontrol_new rt5640_out_l_mix[] = {
 };
 
 static const struct snd_kcontrol_new rt5640_out_r_mix[] = {
-	SOC_DAPM_SINGLE("SPK MIXR Switch", RT5640_OUT_R3_MIXER,
-			RT5640_M_SM_L_OM_R_SFT, 1, 1),
 	SOC_DAPM_SINGLE("BST2 Switch", RT5640_OUT_R3_MIXER,
-			RT5640_M_BST4_OM_R_SFT, 1, 1),
+			RT5640_M_BST2_OM_R_SFT, 1, 1),
+	SOC_DAPM_SINGLE("BST3 Switch", RT5640_OUT_R3_MIXER,
+			RT5640_M_BST3_OM_R_SFT, 1, 1),
 	SOC_DAPM_SINGLE("BST1 Switch", RT5640_OUT_R3_MIXER,
 			RT5640_M_BST1_OM_R_SFT, 1, 1),
 	SOC_DAPM_SINGLE("INR Switch", RT5640_OUT_R3_MIXER,
@@ -997,7 +1015,8 @@ static int rt5640_lout_event(struct snd_soc_dapm_widget *w,
 
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMU:
-		hp_amp_power_on(component);
+		//hp_amp_power_on(component);
+		//XXX: ^^ breaks hpout restore
 		snd_soc_component_update_bits(component, RT5640_PWR_ANLG1,
 			RT5640_PWR_LM, RT5640_PWR_LM);
 		snd_soc_component_update_bits(component, RT5640_OUTPUT,
@@ -1605,8 +1624,8 @@ static const struct snd_soc_dapm_route rt5640_specific_dapm_routes[] = {
 	{"SPK MIXL", "DAC L2 Switch", "DAC L2"},
 	{"SPK MIXR", "DAC R2 Switch", "DAC R2"},
 
-	{"OUT MIXL", "SPK MIXL Switch", "SPK MIXL"},
-	{"OUT MIXR", "SPK MIXR Switch", "SPK MIXR"},
+	{"OUT MIXL", "BST3 Switch", "BST3"},
+	{"OUT MIXR", "BST3 Switch", "BST3"},
 
 	{"OUT MIXL", "DAC R2 Switch", "DAC R2"},
 	{"OUT MIXL", "DAC L2 Switch", "DAC L2"},
@@ -1839,6 +1858,9 @@ static int rt5640_set_dai_sysclk(struct snd_soc_dai *dai,
 	unsigned int reg_val = 0;
 	unsigned int pll_bit = 0;
 	int ret;
+
+	if (freq == 0)
+		return 0;
 
 	switch (clk_id) {
 	case RT5640_SCLK_S_MCLK:

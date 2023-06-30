@@ -654,12 +654,8 @@
 #define RT5640_G_DAC_L1_OM_L_SFT		7
 
 /* Output Left Mixer Control 3 (0x4f) */
-#define RT5640_M_SM_L_OM_L			(0x1 << 8)
-#define RT5640_M_SM_L_OM_L_SFT			8
-#define RT5640_M_BST3_OM_L			(0x1 << 7)
-#define RT5640_M_BST3_OM_L_SFT			7
-#define RT5640_M_BST2_OM_L			(0x1 << 6)
-#define RT5640_M_BST2_OM_L_SFT			6
+#define RT5640_M_BST3_OM_L			(0x1 << 6)
+#define RT5640_M_BST3_OM_L_SFT			6
 #define RT5640_M_BST1_OM_L			(0x1 << 5)
 #define RT5640_M_BST1_OM_L_SFT			5
 #define RT5640_M_IN_L_OM_L			(0x1 << 4)
@@ -694,12 +690,12 @@
 #define RT5640_G_DAC_R1_OM_R_SFT		7
 
 /* Output Right Mixer Control 3 (0x52) */
-#define RT5640_M_SM_L_OM_R			(0x1 << 8)
-#define RT5640_M_SM_L_OM_R_SFT			8
 #define RT5640_M_BST4_OM_R			(0x1 << 7)
 #define RT5640_M_BST4_OM_R_SFT			7
-#define RT5640_M_BST2_OM_R			(0x1 << 6)
-#define RT5640_M_BST2_OM_R_SFT			6
+#define RT5640_M_BST2_OM_R			(0x1 << 7)
+#define RT5640_M_BST2_OM_R_SFT			7
+#define RT5640_M_BST3_OM_R			(0x1 << 6)
+#define RT5640_M_BST3_OM_R_SFT			6
 #define RT5640_M_BST1_OM_R			(0x1 << 5)
 #define RT5640_M_BST1_OM_R_SFT			5
 #define RT5640_M_IN_R_OM_R			(0x1 << 4)
