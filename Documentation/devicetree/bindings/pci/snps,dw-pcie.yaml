@@ -193,9 +193,22 @@ properties:
           oneOf:
             - description: See native "app" IRQ for details
               enum: [ intr ]
+        - description: Combined Legacy A/B/C/D interrupt signal.
+          const: legacy
+        - description: Combined System interrupt signal.
+          const: sys
+        - description: Combined Power Management interrupt signal.
+          const: pmc
+        - description: Combined Message Received interrupt signal.
+          const: msg
+        - description: Combined Error interrupt signal.
+          const: err
+
     allOf:
       - contains:
-          const: msi
+          enum:
+            - msi
+            - msg
 
 additionalProperties: true
 
