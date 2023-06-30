@@ -16,6 +16,7 @@
 #include <linux/iio/events.h>
 #include <linux/iio/iio.h>
 #include <linux/iio/sysfs.h>
+#include <linux/regulator/consumer.h>
 
 #define STK3310_REG_STATE			0x00
 #define STK3310_REG_PSCTRL			0x01
@@ -117,6 +118,8 @@ struct stk3310_data {
 	struct regmap_field *reg_int_ps;
 	struct regmap_field *reg_flag_psint;
 	struct regmap_field *reg_flag_nf;
+	struct regulator *vdd_reg;
+	struct regulator *i2c_reg;
 };
 
 static const struct iio_event_spec stk3310_events[] = {
@@ -607,6 +610,16 @@ static int stk3310_probe(struct i2c_client *client)
 
 	mutex_init(&data->lock);
 
+	data->vdd_reg = devm_regulator_get_optional(&client->dev, "vdd");
+	if (IS_ERR(data->vdd_reg))
+		return dev_err_probe(&client->dev, PTR_ERR(data->vdd_reg),
+				     "get regulator vdd failed\n");
+
+	data->i2c_reg = devm_regulator_get(&client->dev, "i2c");
+	if (IS_ERR(data->i2c_reg))
+		return dev_err_probe(&client->dev, PTR_ERR(data->i2c_reg),
+				     "get regulator i2c failed\n");
+
 	ret = stk3310_regmap_init(data);
 	if (ret < 0)
 		return ret;
@@ -617,9 +630,22 @@ static int stk3310_probe(struct i2c_client *client)
 	indio_dev->channels = stk3310_channels;
 	indio_dev->num_channels = ARRAY_SIZE(stk3310_channels);
 
+	if (data->vdd_reg) {
+		ret = regulator_enable(data->vdd_reg);
+		if (ret)
+			return dev_err_probe(&client->dev, ret,
+					     "regulator vdd enable failed\n");
+	}
+
+	ret = regulator_enable(data->i2c_reg);
+	if (ret) {
+		dev_err_probe(&client->dev, ret, "regulator i2c enable failed\n");
+		goto err_vdd_disable;
+	}
+
 	ret = stk3310_init(indio_dev);
 	if (ret < 0)
-		return ret;
+		goto err_i2c_disable;
 
 	if (client->irq > 0) {
 		ret = devm_request_threaded_irq(&client->dev, client->irq,
@@ -645,32 +671,72 @@ static int stk3310_probe(struct i2c_client *client)
 
 err_standby:
 	stk3310_set_state(data, STK3310_STATE_STANDBY);
+err_i2c_disable:
+	regulator_disable(data->i2c_reg);
+err_vdd_disable:
+	if (data->vdd_reg)
+		regulator_disable(data->vdd_reg);
 	return ret;
 }
 
 static void stk3310_remove(struct i2c_client *client)
 {
 	struct iio_dev *indio_dev = i2c_get_clientdata(client);
+	struct stk3310_data *data = iio_priv(indio_dev);
 
 	iio_device_unregister(indio_dev);
 	stk3310_set_state(iio_priv(indio_dev), STK3310_STATE_STANDBY);
+	regulator_disable(data->i2c_reg);
+	if (data->vdd_reg)
+		regulator_disable(data->vdd_reg);
 }
 
 static int stk3310_suspend(struct device *dev)
 {
 	struct stk3310_data *data;
+	int ret;
 
 	data = iio_priv(i2c_get_clientdata(to_i2c_client(dev)));
 
-	return stk3310_set_state(data, STK3310_STATE_STANDBY);
+	ret = stk3310_set_state(data, STK3310_STATE_STANDBY);
+	if (ret)
+		return ret;
+
+	if (data->vdd_reg) {
+		regcache_mark_dirty(data->regmap);
+		regulator_disable(data->vdd_reg);
+	}
+
+	regulator_disable(data->i2c_reg);
+
+	return 0;
 }
 
 static int stk3310_resume(struct device *dev)
 {
-	u8 state = 0;
 	struct stk3310_data *data;
+	u8 state = 0;
+	int ret;
 
 	data = iio_priv(i2c_get_clientdata(to_i2c_client(dev)));
+
+	if (data->vdd_reg) {
+		ret = regulator_enable(data->vdd_reg);
+		if (ret) {
+			dev_err(dev, "Failed to re-enable regulator vdd\n");
+			return ret;
+		}
+
+		regcache_sync(data->regmap);
+	}
+
+	ret = regulator_enable(data->i2c_reg);
+	if (ret) {
+		dev_err(dev, "Failed to re-enable regulator i2c\n");
+		regulator_disable(data->vdd_reg);
+		return ret;
+	}
+
 	if (data->ps_enabled)
 		state |= STK3310_STATE_EN_PS;
 	if (data->als_enabled)
