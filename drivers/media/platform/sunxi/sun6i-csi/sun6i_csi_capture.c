@@ -22,6 +22,8 @@
 
 /* Helpers */
 
+#define SUN6I_BUS_FMTS(fmt...) (const u32[]) {fmt, 0}
+
 void sun6i_csi_capture_dimensions(struct sun6i_csi_device *csi_dev,
 				  unsigned int *width, unsigned int *height)
 {
@@ -49,72 +51,86 @@ static const struct sun6i_csi_capture_format sun6i_csi_capture_formats[] = {
 		.pixelformat		= V4L2_PIX_FMT_SBGGR8,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_8,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_8,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_SBGGR8_1X8),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_SGBRG8,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_8,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_8,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_SGBRG8_1X8),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_SGRBG8,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_8,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_8,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_SGRBG8_1X8),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_SRGGB8,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_8,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_8,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_SRGGB8_1X8),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_SBGGR10,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_10,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_10,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_SBGGR10_1X10),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_SGBRG10,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_10,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_10,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_SGBRG10_1X10),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_SGRBG10,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_10,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_10,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_SGRBG10_1X10),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_SRGGB10,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_10,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_10,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_SRGGB10_1X10),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_SBGGR12,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_12,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_12,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_SBGGR12_1X12),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_SGBRG12,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_12,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_12,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_SGBRG12_1X12),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_SGRBG12,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_12,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_12,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_SGRBG12_1X12),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_SRGGB12,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_12,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_12,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_SRGGB12_1X12),
 	},
 	/* RGB */
 	{
 		.pixelformat		= V4L2_PIX_FMT_RGB565,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RGB565,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RGB565,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_RGB565_2X8_LE),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_RGB565X,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RGB565,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RGB565,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_RGB565_2X8_BE),
 	},
 	/* YUV422 */
 	{
@@ -123,6 +139,8 @@ static const struct sun6i_csi_capture_format sun6i_csi_capture_formats[] = {
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_8,
 		.input_format_raw	= true,
 		.hsize_len_factor	= 2,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_YUYV8_2X8,
+							 MEDIA_BUS_FMT_YUYV8_1X16),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_YVYU,
@@ -130,6 +148,8 @@ static const struct sun6i_csi_capture_format sun6i_csi_capture_formats[] = {
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_8,
 		.input_format_raw	= true,
 		.hsize_len_factor	= 2,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_YVYU8_2X8,
+							 MEDIA_BUS_FMT_YVYU8_1X16),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_UYVY,
@@ -137,6 +157,8 @@ static const struct sun6i_csi_capture_format sun6i_csi_capture_formats[] = {
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_8,
 		.input_format_raw	= true,
 		.hsize_len_factor	= 2,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_UYVY8_2X8,
+							 MEDIA_BUS_FMT_UYVY8_1X16),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_VYUY,
@@ -144,57 +166,124 @@ static const struct sun6i_csi_capture_format sun6i_csi_capture_formats[] = {
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_8,
 		.input_format_raw	= true,
 		.hsize_len_factor	= 2,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_VYUY8_2X8,
+							 MEDIA_BUS_FMT_VYUY8_1X16),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_NV16,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_YUV422SP,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_YUV422SP,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_UYVY8_2X8,
+                                                         MEDIA_BUS_FMT_UYVY8_1X16,
+                                                         MEDIA_BUS_FMT_VYUY8_2X8,
+                                                         MEDIA_BUS_FMT_VYUY8_1X16,
+                                                         MEDIA_BUS_FMT_YUYV8_2X8,
+                                                         MEDIA_BUS_FMT_YUYV8_1X16,
+                                                         MEDIA_BUS_FMT_YVYU8_2X8,
+                                                         MEDIA_BUS_FMT_YVYU8_1X16),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_NV61,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_YUV422SP,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_YUV422SP,
 		.input_yuv_seq_invert	= true,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_UYVY8_2X8,
+                                                         MEDIA_BUS_FMT_UYVY8_1X16,
+                                                         MEDIA_BUS_FMT_VYUY8_2X8,
+                                                         MEDIA_BUS_FMT_VYUY8_1X16,
+                                                         MEDIA_BUS_FMT_YUYV8_2X8,
+                                                         MEDIA_BUS_FMT_YUYV8_1X16,
+                                                         MEDIA_BUS_FMT_YVYU8_2X8,
+                                                         MEDIA_BUS_FMT_YVYU8_1X16),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_YUV422P,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_YUV422P,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_YUV422P,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_UYVY8_2X8,
+                                                         MEDIA_BUS_FMT_UYVY8_1X16,
+                                                         MEDIA_BUS_FMT_VYUY8_2X8,
+                                                         MEDIA_BUS_FMT_VYUY8_1X16,
+                                                         MEDIA_BUS_FMT_YUYV8_2X8,
+                                                         MEDIA_BUS_FMT_YUYV8_1X16,
+                                                         MEDIA_BUS_FMT_YVYU8_2X8,
+                                                         MEDIA_BUS_FMT_YVYU8_1X16),
 	},
 	/* YUV420 */
 	{
 		.pixelformat		= V4L2_PIX_FMT_NV12_16L16,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_YUV420MB,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_YUV420MB,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_UYVY8_2X8,
+                                                         MEDIA_BUS_FMT_UYVY8_1X16,
+                                                         MEDIA_BUS_FMT_VYUY8_2X8,
+                                                         MEDIA_BUS_FMT_VYUY8_1X16,
+                                                         MEDIA_BUS_FMT_YUYV8_2X8,
+                                                         MEDIA_BUS_FMT_YUYV8_1X16,
+                                                         MEDIA_BUS_FMT_YVYU8_2X8,
+                                                         MEDIA_BUS_FMT_YVYU8_1X16),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_NV12,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_YUV420SP,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_YUV420SP,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_UYVY8_2X8,
+                                                         MEDIA_BUS_FMT_UYVY8_1X16,
+                                                         MEDIA_BUS_FMT_VYUY8_2X8,
+                                                         MEDIA_BUS_FMT_VYUY8_1X16,
+                                                         MEDIA_BUS_FMT_YUYV8_2X8,
+                                                         MEDIA_BUS_FMT_YUYV8_1X16,
+                                                         MEDIA_BUS_FMT_YVYU8_2X8,
+                                                         MEDIA_BUS_FMT_YVYU8_1X16),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_NV21,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_YUV420SP,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_YUV420SP,
 		.input_yuv_seq_invert	= true,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_UYVY8_2X8,
+                                                         MEDIA_BUS_FMT_UYVY8_1X16,
+                                                         MEDIA_BUS_FMT_VYUY8_2X8,
+                                                         MEDIA_BUS_FMT_VYUY8_1X16,
+                                                         MEDIA_BUS_FMT_YUYV8_2X8,
+                                                         MEDIA_BUS_FMT_YUYV8_1X16,
+                                                         MEDIA_BUS_FMT_YVYU8_2X8,
+                                                         MEDIA_BUS_FMT_YVYU8_1X16),
 	},
 
 	{
 		.pixelformat		= V4L2_PIX_FMT_YUV420,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_YUV420P,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_YUV420P,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_UYVY8_2X8,
+                                                         MEDIA_BUS_FMT_UYVY8_1X16,
+                                                         MEDIA_BUS_FMT_VYUY8_2X8,
+                                                         MEDIA_BUS_FMT_VYUY8_1X16,
+                                                         MEDIA_BUS_FMT_YUYV8_2X8,
+                                                         MEDIA_BUS_FMT_YUYV8_1X16,
+                                                         MEDIA_BUS_FMT_YVYU8_2X8,
+                                                         MEDIA_BUS_FMT_YVYU8_1X16),
 	},
 	{
 		.pixelformat		= V4L2_PIX_FMT_YVU420,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_YUV420P,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_YUV420P,
 		.input_yuv_seq_invert	= true,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_UYVY8_2X8,
+                                                         MEDIA_BUS_FMT_UYVY8_1X16,
+                                                         MEDIA_BUS_FMT_VYUY8_2X8,
+                                                         MEDIA_BUS_FMT_VYUY8_1X16,
+                                                         MEDIA_BUS_FMT_YUYV8_2X8,
+                                                         MEDIA_BUS_FMT_YUYV8_1X16,
+                                                         MEDIA_BUS_FMT_YVYU8_2X8,
+                                                         MEDIA_BUS_FMT_YVYU8_1X16),
 	},
 	/* Compressed */
 	{
 		.pixelformat		= V4L2_PIX_FMT_JPEG,
 		.output_format_frame	= SUN6I_CSI_OUTPUT_FMT_FRAME_RAW_8,
 		.output_format_field	= SUN6I_CSI_OUTPUT_FMT_FIELD_RAW_8,
+		.mbus_codes		= SUN6I_BUS_FMTS(MEDIA_BUS_FMT_JPEG_1X8),
 	},
 };
 
@@ -210,118 +299,20 @@ struct sun6i_csi_capture_format *sun6i_csi_capture_format_find(u32 pixelformat)
 	return NULL;
 }
 
-/* RAW formats need an exact match between pixel and mbus formats. */
-static const
-struct sun6i_csi_capture_format_match sun6i_csi_capture_format_matches[] = {
-	/* YUV420 */
-	{
-		.pixelformat	= V4L2_PIX_FMT_YUYV,
-		.mbus_code	= MEDIA_BUS_FMT_YUYV8_2X8,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_YUYV,
-		.mbus_code	= MEDIA_BUS_FMT_YUYV8_1X16,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_YVYU,
-		.mbus_code	= MEDIA_BUS_FMT_YVYU8_2X8,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_YVYU,
-		.mbus_code	= MEDIA_BUS_FMT_YVYU8_1X16,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_UYVY,
-		.mbus_code	= MEDIA_BUS_FMT_UYVY8_2X8,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_UYVY,
-		.mbus_code	= MEDIA_BUS_FMT_UYVY8_1X16,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_VYUY,
-		.mbus_code	= MEDIA_BUS_FMT_VYUY8_2X8,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_VYUY,
-		.mbus_code	= MEDIA_BUS_FMT_VYUY8_1X16,
-	},
-	/* RGB */
-	{
-		.pixelformat	= V4L2_PIX_FMT_RGB565,
-		.mbus_code	= MEDIA_BUS_FMT_RGB565_2X8_LE,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_RGB565X,
-		.mbus_code	= MEDIA_BUS_FMT_RGB565_2X8_BE,
-	},
-	/* Bayer */
-	{
-		.pixelformat	= V4L2_PIX_FMT_SBGGR8,
-		.mbus_code	= MEDIA_BUS_FMT_SBGGR8_1X8,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_SGBRG8,
-		.mbus_code	= MEDIA_BUS_FMT_SGBRG8_1X8,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_SGRBG8,
-		.mbus_code	= MEDIA_BUS_FMT_SGRBG8_1X8,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_SRGGB8,
-		.mbus_code	= MEDIA_BUS_FMT_SRGGB8_1X8,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_SBGGR10,
-		.mbus_code	= MEDIA_BUS_FMT_SBGGR10_1X10,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_SGBRG10,
-		.mbus_code	= MEDIA_BUS_FMT_SGBRG10_1X10,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_SGRBG10,
-		.mbus_code	= MEDIA_BUS_FMT_SGRBG10_1X10,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_SRGGB10,
-		.mbus_code	= MEDIA_BUS_FMT_SRGGB10_1X10,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_SBGGR12,
-		.mbus_code	= MEDIA_BUS_FMT_SBGGR12_1X12,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_SGBRG12,
-		.mbus_code	= MEDIA_BUS_FMT_SGBRG12_1X12,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_SGRBG12,
-		.mbus_code	= MEDIA_BUS_FMT_SGRBG12_1X12,
-	},
-	{
-		.pixelformat	= V4L2_PIX_FMT_SRGGB12,
-		.mbus_code	= MEDIA_BUS_FMT_SRGGB12_1X12,
-	},
-	/* Compressed */
-	{
-		.pixelformat	= V4L2_PIX_FMT_JPEG,
-		.mbus_code	= MEDIA_BUS_FMT_JPEG_1X8,
-	},
-};
-
 static bool sun6i_csi_capture_format_match(u32 pixelformat, u32 mbus_code)
 {
-	unsigned int i;
+	unsigned int i, j;
 
-	for (i = 0; i < ARRAY_SIZE(sun6i_csi_capture_format_matches); i++) {
-		const struct sun6i_csi_capture_format_match *match =
-			&sun6i_csi_capture_format_matches[i];
+	for (i = 0; i < ARRAY_SIZE(sun6i_csi_capture_formats); i++) {
+		const struct sun6i_csi_capture_format *format =
+			&sun6i_csi_capture_formats[i];
 
-		if (match->pixelformat == pixelformat &&
-		    match->mbus_code == mbus_code)
-			return true;
+		if (format->pixelformat == pixelformat) {
+			for (j = 0; format->mbus_codes[j]; j++) {
+				if (mbus_code == format->mbus_codes[j])
+					return true;
+			}
+		}
 	}
 
 	return false;
@@ -731,13 +722,43 @@ static int sun6i_csi_capture_enum_fmt(struct file *file, void *private,
 				      struct v4l2_fmtdesc *fmtdesc)
 {
 	u32 index = fmtdesc->index;
+	unsigned int i;
 
 	if (index >= ARRAY_SIZE(sun6i_csi_capture_formats))
 		return -EINVAL;
 
-	fmtdesc->pixelformat = sun6i_csi_capture_formats[index].pixelformat;
+	for (i = 0; i < ARRAY_SIZE(sun6i_csi_capture_formats); i++) {
+		const struct sun6i_csi_capture_format *format =
+			&sun6i_csi_capture_formats[i];
 
-	return 0;
+		/*
+		 * If a media bus code is specified, only consider formats that
+		 * match it.
+		 */
+		if (fmtdesc->mbus_code) {
+			unsigned int j;
+
+			if (!format->mbus_codes)
+				continue;
+
+			for (j = 0; format->mbus_codes[j]; j++) {
+				if (fmtdesc->mbus_code == format->mbus_codes[j])
+					break;
+			}
+
+			if (!format->mbus_codes[j])
+				continue;
+		}
+
+		if (index == 0) {
+			fmtdesc->pixelformat = format->pixelformat;
+			return 0;
+		}
+
+		index--;
+	}
+
+	return -EINVAL;
 }
 
 static int sun6i_csi_capture_g_fmt(struct file *file, void *private,
@@ -770,6 +791,29 @@ static int sun6i_csi_capture_try_fmt(struct file *file, void *private,
 				     struct v4l2_format *format)
 {
 	sun6i_csi_capture_format_prepare(format);
+
+	return 0;
+}
+
+static int sun6i_csi_capture_enum_framesizes(struct file *file, void *fh,
+					  struct v4l2_frmsizeenum *fsize)
+{
+	const struct sun6i_csi_capture_format *format;
+
+	if (fsize->index > 0)
+		return -EINVAL;
+
+	format = sun6i_csi_capture_format_find(fsize->pixel_format);
+	if (!format)
+		return -EINVAL;
+
+	fsize->type = V4L2_FRMSIZE_TYPE_CONTINUOUS;
+	fsize->stepwise.min_width = SUN6I_CSI_CAPTURE_WIDTH_MIN;
+	fsize->stepwise.max_width = SUN6I_CSI_CAPTURE_WIDTH_MAX;
+	fsize->stepwise.min_height = SUN6I_CSI_CAPTURE_HEIGHT_MIN;
+	fsize->stepwise.max_height = SUN6I_CSI_CAPTURE_HEIGHT_MAX;
+	fsize->stepwise.step_width = 1;
+	fsize->stepwise.step_height = 1;
 
 	return 0;
 }
@@ -810,6 +854,7 @@ static const struct v4l2_ioctl_ops sun6i_csi_capture_ioctl_ops = {
 	.vidioc_g_fmt_vid_cap		= sun6i_csi_capture_g_fmt,
 	.vidioc_s_fmt_vid_cap		= sun6i_csi_capture_s_fmt,
 	.vidioc_try_fmt_vid_cap		= sun6i_csi_capture_try_fmt,
+	.vidioc_enum_framesizes		= sun6i_csi_capture_enum_framesizes,
 
 	.vidioc_enum_input		= sun6i_csi_capture_enum_input,
 	.vidioc_g_input			= sun6i_csi_capture_g_input,
@@ -893,11 +938,14 @@ static int sun6i_csi_capture_link_validate(struct media_link *link)
 	const struct sun6i_csi_capture_format *capture_format;
 	const struct sun6i_csi_bridge_format *bridge_format;
 	unsigned int capture_width, capture_height;
-	unsigned int bridge_width, bridge_height;
 	const struct v4l2_format_info *format_info;
 	u32 pixelformat, capture_field;
-	u32 mbus_code, bridge_field;
+	struct v4l2_subdev_format fmt = {
+		.which = V4L2_SUBDEV_FORMAT_ACTIVE,
+		.pad = SUN6I_CSI_BRIDGE_PAD_SOURCE,
+	};
 	bool match;
+	int ret;
 
 	sun6i_csi_capture_dimensions(csi_dev, &capture_width, &capture_height);
 
@@ -906,18 +954,21 @@ static int sun6i_csi_capture_link_validate(struct media_link *link)
 	if (WARN_ON(!capture_format))
 		return -EINVAL;
 
-	sun6i_csi_bridge_dimensions(csi_dev, &bridge_width, &bridge_height);
+	ret = v4l2_subdev_call_state_active(&csi_dev->bridge.subdev, pad,
+					    get_fmt, &fmt);
+	if (ret)
+		return ret;
 
-	sun6i_csi_bridge_format(csi_dev, &mbus_code, &bridge_field);
-	bridge_format = sun6i_csi_bridge_format_find(mbus_code);
+	bridge_format = sun6i_csi_bridge_format_find(fmt.format.code);
 	if (WARN_ON(!bridge_format))
 		return -EINVAL;
 
 	/* No cropping/scaling is supported. */
-	if (capture_width != bridge_width || capture_height != bridge_height) {
+	if (capture_width != fmt.format.width ||
+	    capture_height != fmt.format.height) {
 		v4l2_err(v4l2_dev,
 			 "invalid input/output dimensions: %ux%u/%ux%u\n",
-			 bridge_width, bridge_height, capture_width,
+			 fmt.format.width, fmt.format.height, capture_width,
 			 capture_height);
 		return -EINVAL;
 	}
@@ -949,7 +1000,8 @@ static int sun6i_csi_capture_link_validate(struct media_link *link)
 	/* With raw input mode, we need a 1:1 match between input and output. */
 	if (bridge_format->input_format == SUN6I_CSI_INPUT_FMT_RAW ||
 	    capture_format->input_format_raw) {
-		match = sun6i_csi_capture_format_match(pixelformat, mbus_code);
+		match = sun6i_csi_capture_format_match(pixelformat,
+						       fmt.format.code);
 		if (!match)
 			goto invalid;
 	}
@@ -1036,7 +1088,8 @@ int sun6i_csi_capture_setup(struct sun6i_csi_device *csi_dev)
 
 	strscpy(video_dev->name, SUN6I_CSI_CAPTURE_NAME,
 		sizeof(video_dev->name));
-	video_dev->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING;
+	video_dev->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING
+				| V4L2_CAP_IO_MC;
 	video_dev->vfl_dir = VFL_DIR_RX;
 	video_dev->release = video_device_release_empty;
 	video_dev->fops = &sun6i_csi_capture_fops;

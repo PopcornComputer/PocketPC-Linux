@@ -797,6 +797,26 @@ config VIDEO_ST_VGXY61
 source "drivers/media/i2c/ccs/Kconfig"
 source "drivers/media/i2c/et8ek8/Kconfig"
 
+config VIDEO_HM5065
+	tristate "Himax HM5065 sensor support"
+	depends on I2C
+	select V4L2_FWNODE
+	select VIDEO_V4L2_SUBDEV_API
+	select MEDIA_CONTROLLER
+	help
+	  This is a V4L2 sensor-level driver for Himax HM5065
+	  5 Mpixel camera.
+
+config VIDEO_GC2145
+	tristate "GalaxyCore GC2145 sensor support"
+	depends on I2C
+	select V4L2_FWNODE
+	select VIDEO_V4L2_SUBDEV_API
+	select MEDIA_CONTROLLER
+	help
+	  This is a V4L2 sensor-level driver for GalaxyCore GC2145
+	  2 Mpixel camera.
+
 endmenu
 
 menu "Lens drivers"

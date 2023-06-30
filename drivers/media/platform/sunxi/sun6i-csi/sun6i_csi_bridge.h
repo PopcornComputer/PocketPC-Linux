@@ -38,23 +38,16 @@ struct sun6i_csi_bridge_async_subdev {
 	struct sun6i_csi_bridge_source	*source;
 };
 
+#define SUN6I_CSI_SOURCE_PARALLEL_MAX 2
+
 struct sun6i_csi_bridge {
 	struct v4l2_subdev		subdev;
 	struct v4l2_async_notifier	notifier;
 	struct media_pad		pads[2];
-	struct v4l2_mbus_framefmt	mbus_format;
-	struct mutex			lock; /* Mbus format lock. */
 
-	struct sun6i_csi_bridge_source	source_parallel;
+	struct sun6i_csi_bridge_source	source_parallel[SUN6I_CSI_SOURCE_PARALLEL_MAX];
 	struct sun6i_csi_bridge_source	source_mipi_csi2;
 };
-
-/* Helpers */
-
-void sun6i_csi_bridge_dimensions(struct sun6i_csi_device *csi_dev,
-				 unsigned int *width, unsigned int *height);
-void sun6i_csi_bridge_format(struct sun6i_csi_device *csi_dev,
-			     u32 *mbus_code, u32 *field);
 
 /* Format */
 
