@@ -89,6 +89,13 @@
 		method = "smc";
 	};
 
+	scpi_protocol: scpi {
+		compatible = "arm,scpi";
+		mboxes = <&msgbox 2>, <&msgbox 3>;
+		mbox-names = "tx", "rx";
+		shmem = <&scpi_sram>;
+	};
+
 	timer {
 		compatible = "arm,armv8-timer";
 		arm,no-tick-in-suspend;
@@ -222,6 +229,19 @@
 			#size-cells = <1>;
 			ranges;
 
+			sram_a2: sram@100000 {
+				compatible = "mmio-sram";
+				reg = <0x00100000 0x18000>;
+				#address-cells = <1>;
+				#size-cells = <1>;
+				ranges = <0 0x00100000 0x18000>;
+
+				scpi_sram: scp-shmem@17c00 {
+					compatible = "arm,scp-shmem";
+					reg = <0x17c00 0x200>;
+				};
+			};
+
 			sram_c: sram@28000 {
 				compatible = "mmio-sram";
 				reg = <0x00028000 0x1e000>;
@@ -256,6 +276,7 @@
 			reg = <0x03001000 0x1000>;
 			clocks = <&osc24M>, <&rtc CLK_OSC32K>, <&rtc CLK_IOSC>;
 			clock-names = "hosc", "losc", "iosc";
+			protected-clocks = <CLK_BUS_MSGBOX>;
 			#clock-cells = <1>;
 			#reset-cells = <1>;
 		};
@@ -952,6 +973,7 @@
 			clocks = <&osc24M>, <&rtc CLK_OSC32K>, <&rtc CLK_IOSC>,
 				 <&ccu CLK_PLL_PERIPH0>;
 			clock-names = "hosc", "losc", "iosc", "pll-periph";
+			protected-clocks = <CLK_R_APB1_TWD>;
 			#clock-cells = <1>;
 			#reset-cells = <1>;
 		};
