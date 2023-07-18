@@ -22,6 +22,6 @@ struct _RT_CHANNEL_INFO;
 u8 rtw_os_init_channel_set(_adapter *padapter, struct _RT_CHANNEL_INFO *channel_set);
 s16 rtw_os_get_total_txpwr_regd_lmt_mbm(_adapter *adapter, u8 cch, enum channel_width bw);
 #endif
-int rtw_regd_init(struct wiphy *wiphy);
+int rtw_regd_init_8723cs(struct wiphy *wiphy);
 
 #endif /* __WIFI_REGD_H__ */

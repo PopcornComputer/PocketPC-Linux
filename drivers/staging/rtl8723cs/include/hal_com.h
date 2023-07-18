@@ -386,7 +386,7 @@ void rtw_hal_update_sta_ra_info(PADAPTER padapter, struct sta_info *psta);
 
 /* access HW only */
 u32 rtw_sec_read_cam(_adapter *adapter, u8 addr);
-void rtw_sec_write_cam(_adapter *adapter, u8 addr, u32 wdata);
+//void rtw_sec_write_cam(_adapter *adapter, u8 addr, u32 wdata);
 void rtw_sec_read_cam_ent(_adapter *adapter, u8 id, u8 *ctrl, u8 *mac, u8 *key);
 void rtw_sec_write_cam_ent(_adapter *adapter, u8 id, u16 ctrl, u8 *mac, u8 *key);
 void rtw_sec_clr_cam_ent(_adapter *adapter, u8 id);

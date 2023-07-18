@@ -389,7 +389,7 @@ static int rtw_reg_notifier_return(struct wiphy *wiphy, struct regulatory_reques
 }
 #endif
 
-int rtw_regd_init(struct wiphy *wiphy)
+int rtw_regd_init_8723cs(struct wiphy *wiphy)
 {
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 9, 0))
 	wiphy->reg_notifier = rtw_reg_notifier_return;

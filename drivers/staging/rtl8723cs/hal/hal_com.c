@@ -2318,7 +2318,7 @@ u32 rtw_sec_read_cam(_adapter *adapter, u8 addr)
 	return rdata;
 }
 
-void rtw_sec_write_cam(_adapter *adapter, u8 addr, u32 wdata)
+static void rtw_sec_write_cam(_adapter *adapter, u8 addr, u32 wdata)
 {
 	_mutex *mutex = &adapter_to_dvobj(adapter)->cam_ctl.sec_cam_access_mutex;
 	u32 cnt = 0;
