@@ -193,7 +193,7 @@
 /* On Euler connector */
 &uart3 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&uart3_pins>;
+	pinctrl-0 = <&uart3_pd_pins>;
 	status = "disabled";
 };
 

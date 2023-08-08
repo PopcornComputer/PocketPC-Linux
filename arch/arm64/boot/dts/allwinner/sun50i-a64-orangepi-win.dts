@@ -397,7 +397,7 @@
 /* On Pi-2 connector, RTS/CTS optional */
 &uart3 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&uart3_pins>;
+	pinctrl-0 = <&uart3_pd_pins>;
 	status = "disabled";
 };
 

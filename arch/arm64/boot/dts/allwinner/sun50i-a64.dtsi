@@ -877,7 +877,7 @@
 				function = "uart2";
 			};
 
-			uart3_pins: uart3-pins {
+			uart3_pd_pins: uart3-pd-pins {
 				pins = "PD0", "PD1";
 				function = "uart3";
 			};
