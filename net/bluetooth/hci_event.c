@@ -6427,6 +6427,10 @@ static void hci_le_adv_report_evt(struct hci_dev *hdev, void *data,
 					   false, instant);
 		} else {
 			bt_dev_err(hdev, "Dropping invalid advertising data");
+			// Log packet data
+			bt_dev_err(hdev, "Dropped Data Length: %u", info->length);
+			print_hex_dump(KERN_ERR, "Raw Data: ", DUMP_PREFIX_ADDRESS,
+							16, 1, info, info->length, true);
 		}
 	}
 
